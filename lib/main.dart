@@ -1,32 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:provider/provider.dart'; // Thay thế BLoC bằng Provider
 
 // sqflite ffi for desktop platforms
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import 'package:guardian/app.dart';
-
-// Import Database
 import 'package:guardian/core/database/database_helper.dart';
 
-import 'package:guardian/core/constants/api_constants.dart';
-import 'package:guardian/core/network/api_client.dart';
-import 'package:guardian/features/admin/data/datasource/admin_local_datasource.dart';
-import 'package:guardian/features/admin/data/datasource/admin_remote_datasource.dart';
-import 'package:guardian/features/admin/data/repositories/admin_repository_impl.dart';
-
-// Import Product Feature
-import 'package:guardian/features/product/data/datasource/product_local_datasource.dart';
-import 'package:guardian/features/product/data/repositories/product_repository_impl.dart';
-import 'package:guardian/features/product/presentation/bloc/product_bloc.dart';
-import 'package:guardian/features/product/presentation/bloc/product_event.dart';
+// --- SAU NÀY BẠN SẼ IMPORT CÁC REPOSITORY & CONTROLLER VÀO ĐÂY ---
+// import 'package:guardian/repositories/machine_repository.dart';
+// import 'package:guardian/controllers/machine_controller.dart';
+// import 'package:guardian/repositories/product_repository.dart';
+// import 'package:guardian/controllers/product_controller.dart';
 
 void main() async {
-  // Đảm bảo Flutter binding được khởi tạo trước khi gọi native code (SQLite)
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Only desktop platforms should use sqflite_common_ffi.
   if (!kIsWeb &&
       (defaultTargetPlatform == TargetPlatform.windows ||
           defaultTargetPlatform == TargetPlatform.macOS ||
@@ -35,36 +25,25 @@ void main() async {
     databaseFactory = databaseFactoryFfi;
   }
 
-  // 1. Khởi tạo Database Services
+  // 1. Khởi tạo Database Services (Giữ nguyên vì nằm trong core - Cực kỳ chuẩn)
   final dbProvider = DatabaseProvider(config: databaseConfig);
   final dbService = DatabaseService(dbProvider);
   final domainQueries = DomainQueries(dbService);
-  final adminLocalDS = AdminLocalDataSourceImpl(dbService);
-  final apiConstants = ApiConstants.dev();
-  final apiClient = ApiClient(constants: apiConstants);
-  final adminRemoteDS = AdminRemoteDataSourceImpl(
-    client: apiClient,
-    constants: apiConstants,
-  );
-  final adminRepository = AdminRepositoryImpl(
-    localDataSource: adminLocalDS,
-    remoteDataSource: adminRemoteDS,
-  );
 
-  // 2. Khởi tạo Data Sources & Repositories cho Product
-  final productLocalDS = ProductLocalDataSourceImpl(dbService, domainQueries);
-  final productRepo = ProductRepositoryImpl(productLocalDS);
+  // 2. Khởi tạo các Repositories (Dùng chung 1 dbService)
+  // final machineRepo = MachineRepository(dbService);
+  // final productRepo = ProductRepository(dbService);
 
-  // 3. Chạy App kèm MultiBlocProvider
+  // 3. Chạy App kèm MultiProvider (Quản lý các Controller)
   runApp(
-    MultiBlocProvider(
+    MultiProvider(
       providers: [
-        BlocProvider<ProductBloc>(
-          // Khởi tạo Bloc và gọi Event LoadProducts ngay khi app mở
-          create: (context) => ProductBloc(repository: productRepo)..add(LoadProducts()),
-        ),
+        // Khai báo các Controller ở đây để toàn app có thể dùng được
+        // ChangeNotifierProvider(create: (_) => MachineController(machineRepo)),
+        // ChangeNotifierProvider(create: (_) => ProductController(productRepo)),
       ],
-      child: GuardianApp(adminRepository: adminRepository),
+      // Gọi GuardianApp cực kỳ sạch sẽ, không cần nhồi nhét Repository vào đây nữa
+      child: const GuardianApp(),
     ),
   );
 }
