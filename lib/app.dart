@@ -1,52 +1,96 @@
 import 'package:flutter/material.dart';
 
-import 'features/admin/domain/repositories/admin_repository.dart';
-import 'features/admin/presentation/pages/admin_dashboard_page.dart';
-import 'features/product/domain/entities/product.dart';
-import 'features/product/presentation/pages/home_page.dart';
-import 'features/product/presentation/pages/product_add_edit_page.dart';
-import 'features/product/presentation/pages/product_detail_page.dart';
-import 'features/product/presentation/pages/product_list_page.dart';
-import 'features/routes/app_routes.dart';
+// Import Models
+import 'package:guardian/models/order_model.dart';
+
+// Import Marketplace Screens
+import 'package:guardian/screens/marketplace/shop_home_screen.dart';
+import 'package:guardian/screens/marketplace/product_detail_screen.dart';
+import 'package:guardian/screens/marketplace/product_form_screen.dart';
+import 'package:guardian/screens/marketplace/cart_screen.dart';
+import 'package:guardian/screens/marketplace/checkout_screen.dart';
+import 'package:guardian/screens/marketplace/order_success_screen.dart';
+import 'package:guardian/screens/marketplace/my_orders_screen.dart';
+import 'package:guardian/screens/marketplace/my_products_screen.dart';
+
+// Import Admin/SME Screens
+import 'package:guardian/screens/marketplace/admin_dashboard_screen.dart';
+import 'package:guardian/screens/marketplace/order_detail_screen.dart';
 
 class GuardianApp extends StatelessWidget {
-  const GuardianApp({
-    super.key,
-    required this.adminRepository,
-  });
-
-  final AdminRepository adminRepository;
+  const GuardianApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Guardian Farm',
+      title: 'Guardian Marketplace',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0F5C45)),
         useMaterial3: true,
+        // AppBar đồng bộ màu thương hiệu
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF0F5C45),
+          foregroundColor: Colors.white,
+          elevation: 0,
+          centerTitle: true,
+        ),
       ),
-      initialRoute: AppRoutes.home,
+      initialRoute: '/',
+      
+      // =============================================================
+      // 1. STATIC ROUTES & SIMPLE PARAMETERS (INT)
+      // =============================================================
       routes: {
-        AppRoutes.home: (context) => const HomePage(),
-        AppRoutes.products: (context) => const ProductListPage(),
-        AppRoutes.productAdd: (context) => const ProductAddEditPage(),
-        AppRoutes.adminDashboard: (context) => AdminDashboardPage(
-              adminRepository: adminRepository,
-              initialTabIndex:
-                  (ModalRoute.of(context)?.settings.arguments as int?) ?? 0,
+        '/': (context) => const ShopHomeScreen(),
+        '/product-form': (context) => const ProductFormScreen(),
+        '/my-products': (context) => const MyProductsScreen(),
+        '/cart': (context) => const CartScreen(),
+        '/admin-dashboard': (context) => const AdminDashboardScreen(),
+        
+        // Fix lỗi: Thêm route này để Dashboard gọi được danh sách đơn hàng
+        '/all-orders': (context) => const MyOrdersScreen(buyerId: 0), 
+
+        '/my-orders': (context) {
+          final buyerId = ModalRoute.of(context)!.settings.arguments as int;
+          return MyOrdersScreen(buyerId: buyerId);
+        },
+        
+        '/product-detail': (context) {
+          final productId = ModalRoute.of(context)!.settings.arguments as int;
+          return ProductDetailScreen(productId: productId);
+        },
+        
+        '/order-success': (context) {
+          final orderId = ModalRoute.of(context)!.settings.arguments as int;
+          return OrderSuccessScreen(orderId: orderId);
+        },
+      },
+
+      // =============================================================
+      // 2. DYNAMIC ROUTES (OBJECT PARAMETERS)
+      // =============================================================
+      onGenerateRoute: (settings) {
+        // Route chi tiết đơn hàng (truyền nguyên Object OrderModel)
+        if (settings.name == '/order-detail') {
+          final order = settings.arguments as OrderModel;
+          return MaterialPageRoute(
+            builder: (context) => OrderDetailScreen(order: order),
+          );
+        }
+
+        // Route thanh toán (truyền danh sách items đã chọn)
+        if (settings.name == '/checkout') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => CheckoutScreen(
+              selectedItems: args['selectedItems'],
+              totalAmount: args['totalAmount'],
             ),
-        AppRoutes.productDetail: (context) {
-          final args = ModalRoute.of(context)?.settings.arguments as Product?;
-          if (args != null) {
-            return ProductDetailPage(product: args, images: const []);
-          }
-          return const SizedBox.shrink();
-        },
-        AppRoutes.productEdit: (context) {
-          final args = ModalRoute.of(context)?.settings.arguments as Product?;
-          return ProductAddEditPage(product: args);
-        },
+          );
+        }
+        
+        return null;
       },
     );
   }

@@ -1,6 +1,6 @@
 name: guardian
 description: A new Flutter project.
-publish_to: 'none'
+publish_to: "none"
 
 version: 1.0.0+1
 
@@ -30,6 +30,9 @@ dependencies:
 
   # BLoC state management
   flutter_bloc: ^8.1.2
+
+  # Provider state management (Đã thêm vào đây)
+  provider: ^6.1.2
 
   # Charts
   fl_chart: ^0.68.0
