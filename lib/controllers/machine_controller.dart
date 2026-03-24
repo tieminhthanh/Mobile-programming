@@ -50,4 +50,39 @@ class MachineController extends ChangeNotifier {
 
   /// Lọc máy theo loại (Ví dụ: Chỉ hiện máy cày)
   // void filterByType(String type) { ... }
+  // ==========================================
+  // 3. XỬ LÝ ĐẶT MÁY (BOOKING LOGIC)
+  // ==========================================
+
+  /// Tính toán tổng tiền dựa trên giờ thuê
+  double calculateTotalPrice(double basePrice, DateTime start, DateTime end) {
+    // Tính khoảng cách thời gian bằng phút, sau đó chia 60 để ra số giờ lẻ (VD: 1.5 giờ)
+    final durationInMinutes = end.difference(start).inMinutes;
+    if (durationInMinutes <= 0) return 0;
+
+    final hours = durationInMinutes / 60.0;
+    return basePrice * hours;
+  }
+
+  /// Tạo lịch đặt máy mới
+  Future<bool> createBooking({
+    required int machineId,
+    required DateTime start,
+    required DateTime end,
+    required double totalPrice,
+  }) async {
+    // Tạm thời hard-code ID = 1 (Nông dân Nguyễn Văn Tèo) và FarmId = 1
+    // Chờ khi ghép code với module Auth của Trường sẽ thay bằng User Session thật.
+    final success = await _repository.bookMachine(
+      machineId: machineId,
+      farmId: 1,
+      bookerId: 1,
+      // Format thời gian chuẩn ISO để lưu SQLite
+      startTime: start.toIso8601String(),
+      endTime: end.toIso8601String(),
+      totalPrice: totalPrice,
+    );
+
+    return success;
+  }
 }
