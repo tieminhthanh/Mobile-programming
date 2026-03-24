@@ -143,4 +143,45 @@ class MachineRepository {
       return false;
     }
   }
+
+  // ==========================================
+  // QUẢN LÝ MÁY CỦA TÔI (CRUD - CHỦ MÁY)
+  // ==========================================
+
+  /// Lấy danh sách máy do mình sở hữu
+  Future<List<AgriMachine>> getMyMachines(int ownerId) async {
+    try {
+      const String sql = '''
+        SELECT m.*, i.ImageUrl 
+        FROM logistics_AgriMachines m
+        LEFT JOIN Images i ON m.MachineId = i.ReferenceId 
+                           AND i.ReferenceType = 'MACHINE' 
+                           AND i.IsPrimary = 1
+        WHERE m.OwnerId = ?
+        ORDER BY m.MachineId DESC
+      ''';
+
+      final maps = await dbService.rawQuery(sql, [ownerId]);
+      return maps.map((map) => AgriMachine.fromMap(map)).toList();
+    } catch (e) {
+      print('Lỗi khi lấy danh sách máy của tôi: $e');
+      return [];
+    }
+  }
+
+  /// Xóa một chiếc máy khỏi hệ thống
+  Future<bool> deleteMachine(int machineId) async {
+    try {
+      final db = await dbService.provider.database;
+      final result = await db.delete(
+        'logistics_AgriMachines',
+        where: 'MachineId = ?',
+        whereArgs: [machineId],
+      );
+      return result > 0;
+    } catch (e) {
+      print('Lỗi khi xóa máy: $e');
+      return false;
+    }
+  }
 }

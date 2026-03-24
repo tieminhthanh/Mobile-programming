@@ -134,4 +134,34 @@ class MachineController extends ChangeNotifier {
     }
     return success;
   }
+
+  // ==========================================
+  // 6. QUẢN LÝ DANH SÁCH MÁY (CRUD)
+  // ==========================================
+
+  List<AgriMachine> myMachines = [];
+  bool isLoadingMyMachines = false;
+
+  /// Tải danh sách máy của mình
+  Future<void> fetchMyMachines() async {
+    isLoadingMyMachines = true;
+    notifyListeners();
+
+    // Tạm thời hard-code OwnerId = 6 (Công Ty Cơ Khí Vina)
+    myMachines = await _repository.getMyMachines(6);
+
+    isLoadingMyMachines = false;
+    notifyListeners();
+  }
+
+  /// Xóa máy và cập nhật lại giao diện
+  Future<bool> removeMachine(int machineId) async {
+    final success = await _repository.deleteMachine(machineId);
+    if (success) {
+      // Xóa thành công ở DB thì xóa luôn trong List hiện tại để UI tự cập nhật
+      myMachines.removeWhere((m) => m.machineId == machineId);
+      notifyListeners();
+    }
+    return success;
+  }
 }

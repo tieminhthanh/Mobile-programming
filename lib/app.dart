@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:guardian/screens/machine/owner_bookings_screen.dart';
+import 'package:guardian/screens/machine/owner_machine_list_screen.dart';
 import 'screens/machine/machine_list_screen.dart';
 
 // --- SAU NÀY BẠN SẼ IMPORT CÁC MÀN HÌNH TỪ THƯ MỤC SCREENS VÀO ĐÂY ---
@@ -21,7 +22,8 @@ class GuardianApp extends StatelessWidget {
       ),
       // Tạm thời để home là một màn hình rỗng chờ các bạn code UI
       // home: const MachineListScreen(),
-      home: const OwnerBookingsScreen(),
+      // home: const OwnerBookingsScreen(),
+      home: const OwnerMachineListScreen(),
 
       // Khai báo Routes chuẩn (Mở comment khi đã có màn hình)
       /*
