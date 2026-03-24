@@ -41,4 +41,38 @@ class MachineRepository {
 
   /// (Dự kiến) Hàm lấy Lịch sử thuê máy của User
   // Future<List<dynamic>> getMyBookings(int userId) async { ... }
+  // ... (các code cũ giữ nguyên)
+
+  /// Tạo một yêu cầu thuê máy mới (Insert vào bảng logistics_MachineBookings)
+  Future<bool> bookMachine({
+    required int machineId,
+    required int farmId,
+    required int bookerId,
+    required String startTime,
+    required String endTime,
+    required double totalPrice,
+  }) async {
+    try {
+      final db = await dbService.provider.database;
+
+      // Tạo Map dữ liệu
+      final values = {
+        'MachineId': machineId,
+        'FarmId': farmId,
+        'BookerId': bookerId,
+        'StartTime': startTime,
+        'EndTime': endTime,
+        'TotalPrice': totalPrice,
+        'Status': 'BOOKED', // Mặc định khi vừa đặt là BOOKED
+      };
+
+      // Gọi hàm insert của dbService
+      final result = await db.insert('logistics_MachineBookings', values);
+
+      return result > 0; // Trả về true nếu insert thành công
+    } catch (e) {
+      print('Lỗi khi đặt máy: $e');
+      return false;
+    }
+  }
 }
