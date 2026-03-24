@@ -3,6 +3,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/machine_controller.dart';
 import '../../core/utils/formatter.dart';
+import 'booking_detail_screen.dart';
 
 class MachineCalendarScreen extends StatefulWidget {
   const MachineCalendarScreen({super.key});
@@ -86,13 +87,24 @@ class _MachineCalendarScreenState extends State<MachineCalendarScreen> {
       itemBuilder: (context, index) {
         final ev = dayEvents[index];
         return ListTile(
+          onTap: () {
+            // KHI BẤM VÀO ĐƠN TRÊN LỊCH -> NHẢY SANG CHI TIẾT
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => BookingDetailScreen(booking: ev),
+              ),
+            );
+          },
           leading: const Icon(Icons.circle, size: 12, color: Colors.orange),
           title: Text(
             ev['MachineType'],
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           subtitle: Text('Trạng thái: ${ev['Status']}'),
-          trailing: Text(AppFormatter.currency(ev['TotalPrice'] ?? 0)),
+          trailing: const Icon(
+            Icons.chevron_right,
+          ), // Thêm icon mũi tên để báo hiệu bấm được
         );
       },
     );
