@@ -164,4 +164,21 @@ class MachineController extends ChangeNotifier {
     }
     return success;
   }
+
+  /// Hàm lưu máy (Tự động nhận diện Thêm hay Sửa dựa vào MachineId)
+  Future<bool> saveMachine(AgriMachine machine) async {
+    bool success;
+    if (machine.machineId == null) {
+      // Nếu không có ID -> Thêm mới
+      success = await _repository.insertMachine(machine);
+    } else {
+      // Nếu có ID -> Cập nhật
+      success = await _repository.updateMachine(machine);
+    }
+
+    if (success) {
+      await fetchMyMachines(); // Tải lại danh sách máy của tôi sau khi lưu
+    }
+    return success;
+  }
 }

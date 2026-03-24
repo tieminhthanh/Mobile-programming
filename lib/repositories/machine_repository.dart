@@ -184,4 +184,33 @@ class MachineRepository {
       return false;
     }
   }
+
+  /// Thêm máy mới vào kho
+  Future<bool> insertMachine(AgriMachine machine) async {
+    try {
+      final db = await dbService.provider.database;
+      final result = await db.insert('logistics_AgriMachines', machine.toMap());
+      return result > 0;
+    } catch (e) {
+      print('Lỗi khi thêm máy: $e');
+      return false;
+    }
+  }
+
+  /// Cập nhật thông tin máy hiện có
+  Future<bool> updateMachine(AgriMachine machine) async {
+    try {
+      final db = await dbService.provider.database;
+      final result = await db.update(
+        'logistics_AgriMachines',
+        machine.toMap(),
+        where: 'MachineId = ?',
+        whereArgs: [machine.machineId],
+      );
+      return result > 0;
+    } catch (e) {
+      print('Lỗi khi cập nhật máy: $e');
+      return false;
+    }
+  }
 }

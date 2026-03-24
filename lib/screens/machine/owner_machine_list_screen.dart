@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../controllers/machine_controller.dart';
 import '../../core/utils/formatter.dart';
 import '../../models/agri_machine.dart';
+import 'add_edit_machine_screen.dart';
 
 class OwnerMachineListScreen extends StatefulWidget {
   const OwnerMachineListScreen({super.key});
@@ -157,7 +158,10 @@ class _OwnerMachineListScreenState extends State<OwnerMachineListScreen> {
                       IconButton(
                         icon: const Icon(Icons.edit_note, color: Colors.blue),
                         onPressed: () {
-                          // TODO: Chuyển sang màn hình Edit
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => AddEditMachineScreen(machine: machine)),
+                          );
                         },
                       ),
                       // Nút Xóa
@@ -180,7 +184,10 @@ class _OwnerMachineListScreenState extends State<OwnerMachineListScreen> {
       // Nút Thêm máy mới nổi bật
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          // TODO: Chuyển sang màn hình Add Machine
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AddEditMachineScreen()),
+          );
         },
         backgroundColor: const Color(0xFF0F5C45),
         icon: const Icon(Icons.add, color: Colors.white),
