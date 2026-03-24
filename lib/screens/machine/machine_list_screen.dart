@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../controllers/machine_controller.dart';
+import '../../core/utils/formatter.dart';
 import '../../models/agri_machine.dart';
+import 'machine_detail_screen.dart';
 
 class MachineListScreen extends StatefulWidget {
   const MachineListScreen({super.key});
@@ -176,7 +178,8 @@ class _MachineListScreenState extends State<MachineListScreen> {
   // =========================================================
   Widget _buildMachineCard(AgriMachine machine) {
     // Format tiền tệ gọn gàng
-    final priceStr = '${machine.basePricePerHour.toInt()} đ/giờ';
+    final priceStr =
+        '${AppFormatter.currencyShort(machine.basePricePerHour)}/giờ';
 
     return Container(
       decoration: BoxDecoration(
@@ -260,6 +263,13 @@ class _MachineListScreenState extends State<MachineListScreen> {
                     ElevatedButton(
                       onPressed: () {
                         // TODO: Chuyển sang màn hình Chi tiết Máy
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                MachineDetailScreen(machine: machine),
+                          ),
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF0F5C45),
