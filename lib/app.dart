@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'screens/machine/machine_list_screen.dart';
 
 // --- SAU NÀY BẠN SẼ IMPORT CÁC MÀN HÌNH TỪ THƯ MỤC SCREENS VÀO ĐÂY ---
 // import 'package:guardian/screens/machine/machine_list_screen.dart';
@@ -18,15 +19,7 @@ class GuardianApp extends StatelessWidget {
         useMaterial3: true,
       ),
       // Tạm thời để home là một màn hình rỗng chờ các bạn code UI
-      home: const Scaffold(
-        body: Center(
-          child: Text(
-            'Hệ thống Thần Hộ Mệnh\nĐang xây dựng...',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-        ),
-      ),
+      home: const MachineListScreen(),
 
       // Khai báo Routes chuẩn (Mở comment khi đã có màn hình)
       /*
