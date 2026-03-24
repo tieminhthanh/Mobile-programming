@@ -99,4 +99,48 @@ class MachineRepository {
       return false;
     }
   }
+
+  // ==========================================
+  // PHẦN DÀNH CHO CHỦ MÁY (MACHINE OWNER)
+  // ==========================================
+
+  /// Lấy danh sách các đơn người ta đặt máy CỦA MÌNH
+  Future<List<Map<String, dynamic>>> getIncomingRequests(int ownerId) async {
+    try {
+      final String sql = '''
+        SELECT 
+          b.*, 
+          m.MachineType, 
+          u.DisplayName AS BookerName,
+          u.PhoneNumber AS BookerPhone
+        FROM logistics_MachineBookings b
+        JOIN logistics_AgriMachines m ON m.MachineId = b.MachineId
+        JOIN Users u ON u.UserId = b.BookerId
+        WHERE m.OwnerId = ?
+        ORDER BY b.CreatedAt DESC
+      ''';
+
+      return await dbService.rawQuery(sql, [ownerId]);
+    } catch (e) {
+      print('Lỗi khi lấy danh sách yêu cầu đến: $e');
+      return [];
+    }
+  }
+
+  /// Cập nhật trạng thái của đơn thuê máy
+  Future<bool> updateBookingStatus(int bookingId, String newStatus) async {
+    try {
+      final db = await dbService.provider.database;
+      final result = await db.update(
+        'logistics_MachineBookings',
+        {'Status': newStatus},
+        where: 'BookingId = ?',
+        whereArgs: [bookingId],
+      );
+      return result > 0;
+    } catch (e) {
+      print('Lỗi khi cập nhật trạng thái đơn: $e');
+      return false;
+    }
+  }
 }

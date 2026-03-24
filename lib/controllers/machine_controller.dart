@@ -104,4 +104,34 @@ class MachineController extends ChangeNotifier {
     isLoadingHistory = false;
     notifyListeners();
   }
+
+  // ==========================================
+  // 5. QUẢN LÝ ĐƠN HÀNG ĐẾN (DÀNH CHO CHỦ MÁY)
+  // ==========================================
+
+  List<Map<String, dynamic>> incomingRequests = [];
+  bool isLoadingIncoming = false;
+
+  /// Lấy danh sách yêu cầu thuê máy
+  Future<void> fetchIncomingRequests() async {
+    isLoadingIncoming = true;
+    notifyListeners();
+
+    // Tạm thời hard-code OwnerId = 6 (Công Ty Cơ Khí Vina - sở hữu máy cày, drone...)
+    incomingRequests = await _repository.getIncomingRequests(6);
+
+    isLoadingIncoming = false;
+    notifyListeners();
+  }
+
+  /// Chủ máy bấm chuyển trạng thái đơn hàng
+  Future<bool> changeBookingStatus(int bookingId, String newStatus) async {
+    final success = await _repository.updateBookingStatus(bookingId, newStatus);
+
+    if (success) {
+      // Nếu update DB thành công, ta tải lại danh sách đơn hàng để UI cập nhật
+      await fetchIncomingRequests();
+    }
+    return success;
+  }
 }
