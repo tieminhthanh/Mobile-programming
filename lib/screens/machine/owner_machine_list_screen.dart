@@ -40,27 +40,26 @@ class _OwnerMachineListScreenState extends State<OwnerMachineListScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
-              Navigator.pop(ctx);
-              final success = await context
+              Navigator.pop(ctx); // Đóng Dialog trước
+
+              // Gọi Controller và hứng kết quả dạng Map {success: bool, message: String}
+              final result = await context
                   .read<MachineController>()
                   .removeMachine(machineId);
 
               if (!mounted) return;
-              if (success) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Đã xóa máy thành công!'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Có lỗi xảy ra khi xóa!'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
+
+              // Hiển thị SnackBar dựa trên thông báo trả về từ "Bộ não" Controller
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(result['message'] ?? 'Đã có lỗi xảy ra'),
+                  backgroundColor: result['success'] == true
+                      ? Colors.green
+                      : Colors.red,
+                  behavior: SnackBarBehavior
+                      .floating, // Cho nó nổi lên nhìn cho chuyên nghiệp
+                ),
+              );
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             child: const Text('Xóa', style: TextStyle(color: Colors.white)),
@@ -160,7 +159,10 @@ class _OwnerMachineListScreenState extends State<OwnerMachineListScreen> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => AddEditMachineScreen(machine: machine)),
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  AddEditMachineScreen(machine: machine),
+                            ),
                           );
                         },
                       ),
@@ -186,7 +188,9 @@ class _OwnerMachineListScreenState extends State<OwnerMachineListScreen> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const AddEditMachineScreen()),
+            MaterialPageRoute(
+              builder: (context) => const AddEditMachineScreen(),
+            ),
           );
         },
         backgroundColor: const Color(0xFF0F5C45),

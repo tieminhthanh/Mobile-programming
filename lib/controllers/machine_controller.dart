@@ -125,12 +125,22 @@ class MachineController extends ChangeNotifier {
   }
 
   /// Chủ máy bấm chuyển trạng thái đơn hàng
+  /// Chủ máy bấm chuyển trạng thái đơn hàng
   Future<bool> changeBookingStatus(int bookingId, String newStatus) async {
     final success = await _repository.updateBookingStatus(bookingId, newStatus);
 
     if (success) {
-      // Nếu update DB thành công, ta tải lại danh sách đơn hàng để UI cập nhật
+      // 1. Cập nhật lại danh sách Đơn hàng (Dành cho màn hình List)
       await fetchIncomingRequests();
+
+      // 2. CẬP NHẬT LẠI DỮ LIỆU LỊCH (Dành cho màn hình Calendar) - QUAN TRỌNG!
+      await fetchCalendarData();
+
+      // 3. Cập nhật lại Thống kê (Vì doanh thu có thể đã thay đổi)
+      await fetchOwnerStats();
+
+      // Lúc này notifyListeners() bên trong các hàm fetch trên sẽ báo cho
+      // TẤT CẢ các màn hình đang mở (dù đang nằm ở lớp dưới Navigator) phải vẽ lại.
     }
     return success;
   }
@@ -155,14 +165,27 @@ class MachineController extends ChangeNotifier {
   }
 
   /// Xóa máy và cập nhật lại giao diện
-  Future<bool> removeMachine(int machineId) async {
+  Future<Map<String, dynamic>> removeMachine(int machineId) async {
+    // 1. Kiểm tra lịch bận trước
+    bool isBusy = await _repository.hasActiveBookings(machineId);
+
+    if (isBusy) {
+      return {
+        'success': false,
+        'message': 'Máy đang có lịch thuê, không thể xóa!',
+      };
+    }
+
+    // 2. Nếu không bận mới tiến hành xóa
     final success = await _repository.deleteMachine(machineId);
     if (success) {
-      // Xóa thành công ở DB thì xóa luôn trong List hiện tại để UI tự cập nhật
       myMachines.removeWhere((m) => m.machineId == machineId);
       notifyListeners();
     }
-    return success;
+    return {
+      'success': success,
+      'message': success ? 'Đã xóa máy!' : 'Lỗi hệ thống!',
+    };
   }
 
   /// Hàm lưu máy (Tự động nhận diện Thêm hay Sửa dựa vào MachineId)

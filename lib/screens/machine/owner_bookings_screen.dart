@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../controllers/machine_controller.dart';
 import '../../core/utils/formatter.dart';
+import 'booking_detail_screen.dart';
 
 class OwnerBookingsScreen extends StatefulWidget {
   const OwnerBookingsScreen({super.key});
@@ -112,140 +113,107 @@ class _OwnerBookingsScreenState extends State<OwnerBookingsScreen> {
             padding: const EdgeInsets.all(16),
             itemCount: controller.incomingRequests.length,
             separatorBuilder: (context, index) => const SizedBox(height: 16),
+
+            // Trong OwnerBookingsScreen - file: lib/screens/machine/owner_bookings_screen.dart
             itemBuilder: (context, index) {
               final req = controller.incomingRequests[index];
               final status = req['Status'] as String;
 
-              return Card(
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: const BorderSide(color: Color(0xFFE0E0E0)),
-                ),
-                color: Colors.white,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+              return InkWell(
+                onTap: () {
+                  // BẤM VÀO CARD LÀ SANG CHI TIẾT LUÔN
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => BookingDetailScreen(booking: req),
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFE0E0E0)),
+                  ),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Tiêu đề: Tên máy + Trạng thái
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Expanded(
-                            child: Text(
-                              req['MachineType'],
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF0F5C45),
-                              ),
-                              overflow: TextOverflow.ellipsis,
+                          // 1. Icon máy (Gọn gàng)
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF5F7FA),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.agriculture,
+                              color: Color(0xFF0F5C45),
                             ),
                           ),
+                          const SizedBox(width: 12),
+
+                          // 2. Thông tin chính
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  req['MachineType'],
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Khách: ${req['BookerName']}',
+                                  style: const TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // 3. Trạng thái (Badge nhỏ)
                           _buildStatusBadge(status),
                         ],
                       ),
                       const Divider(height: 24),
-
-                      // Thông tin người thuê (Nông dân)
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.person,
-                            size: 20,
-                            color: Colors.grey,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Người thuê: ${req['BookerName']}',
-                            style: const TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          const Icon(Icons.phone, size: 20, color: Colors.grey),
-                          const SizedBox(width: 8),
-                          Text(AppFormatter.phone(req['BookerPhone'] ?? '')),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Thời gian
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF5F7FA),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text('Từ:'),
-                                Text(
-                                  _formatDate(req['StartTime']),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text('Đến:'),
-                                Text(
-                                  _formatDate(
-                                    req['EndTime'] ?? req['StartTime'],
-                                  ),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Tổng tiền & Nút Action
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
+                          // 4. Thời gian bắt đầu (Chỉ cần mốc này để biết khi nào giao máy)
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.access_time,
+                                size: 16,
+                                color: Colors.grey,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                _formatDate(req['StartTime']),
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          // 5. Giá tiền (Điểm nhấn quan trọng nhất)
                           Text(
                             AppFormatter.currency(req['TotalPrice'] ?? 0),
                             style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.redAccent,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w900,
+                              color: Color(0xFF0F5C45),
                             ),
                           ),
-                          // Ẩn nút nếu đã Hủy hoặc Hoàn thành
-                          if (status == 'BOOKED' || status == 'IN_PROGRESS')
-                            ElevatedButton(
-                              onPressed: () =>
-                                  _updateStatus(req['BookingId'], status),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: status == 'BOOKED'
-                                    ? Colors.blue
-                                    : Colors.green,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                              child: Text(
-                                status == 'BOOKED'
-                                    ? 'Duyệt & Bắt đầu'
-                                    : 'Hoàn thành',
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                            ),
                         ],
                       ),
                     ],

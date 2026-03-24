@@ -262,4 +262,22 @@ class MachineRepository {
       return {'revenue': 0.0, 'completed': 0, 'totalMachines': 0};
     }
   }
+
+  /// Kiểm tra xem máy có đơn hàng nào đang 'BOOKED' hoặc 'IN_PROGRESS' không
+  Future<bool> hasActiveBookings(int machineId) async {
+    try {
+      final result = await dbService.rawQuery(
+        '''
+        SELECT COUNT(*) as count 
+        FROM logistics_MachineBookings 
+        WHERE MachineId = ? AND Status IN ('BOOKED', 'IN_PROGRESS')
+      ''',
+        [machineId],
+      );
+
+      return (result.first['count'] as int) > 0;
+    } catch (e) {
+      return false;
+    }
+  }
 }
