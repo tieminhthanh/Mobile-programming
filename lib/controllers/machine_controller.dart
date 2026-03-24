@@ -85,4 +85,23 @@ class MachineController extends ChangeNotifier {
 
     return success;
   }
+
+  // ==========================================
+  // 4. LỊCH SỬ THUÊ MÁY (BOOKING HISTORY)
+  // ==========================================
+
+  List<Map<String, dynamic>> myBookings = [];
+  bool isLoadingHistory = false;
+
+  /// Gọi hàm này khi mở màn hình Lịch sử
+  Future<void> fetchMyBookings() async {
+    isLoadingHistory = true;
+    notifyListeners();
+
+    // Tạm thời hard-code UserId = 1 (Bác nông dân Nguyễn Văn Tèo)
+    myBookings = await _repository.getMyBookings(1);
+
+    isLoadingHistory = false;
+    notifyListeners();
+  }
 }

@@ -43,6 +43,30 @@ class MachineRepository {
   // Future<List<dynamic>> getMyBookings(int userId) async { ... }
   // ... (các code cũ giữ nguyên)
 
+  /// Lấy lịch sử đặt máy của một Nông dân cụ thể
+  Future<List<Map<String, dynamic>>> getMyBookings(int userId) async {
+    try {
+      // JOIN 3 bảng: Bookings (Lấy giờ, trạng thái) + AgriMachines (Lấy tên máy) + Images (Lấy ảnh bìa)
+      const String sql = '''
+        SELECT b.*, m.MachineType, i.ImageUrl
+        FROM logistics_MachineBookings b
+        JOIN logistics_AgriMachines m ON m.MachineId = b.MachineId
+        LEFT JOIN Images i ON m.MachineId = i.ReferenceId 
+                           AND i.ReferenceType = 'MACHINE' 
+                           AND i.IsPrimary = 1
+        WHERE b.BookerId = ?
+        ORDER BY b.CreatedAt DESC
+      ''';
+
+      // Chạy lệnh query và truyền userId vào vị trí dấu ?
+      final result = await dbService.rawQuery(sql, [userId]);
+      return result;
+    } catch (e) {
+      print('Lỗi khi lấy lịch sử thuê máy: $e');
+      return [];
+    }
+  }
+
   /// Tạo một yêu cầu thuê máy mới (Insert vào bảng logistics_MachineBookings)
   Future<bool> bookMachine({
     required int machineId,

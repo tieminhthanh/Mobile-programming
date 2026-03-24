@@ -7,6 +7,7 @@ import '../../controllers/machine_controller.dart';
 import '../../core/utils/formatter.dart';
 import '../../models/agri_machine.dart';
 import 'machine_detail_screen.dart';
+import 'my_bookings_screen.dart';
 
 class MachineListScreen extends StatefulWidget {
   const MachineListScreen({super.key});
@@ -43,6 +44,26 @@ class _MachineListScreenState extends State<MachineListScreen> {
             fontSize: 22,
           ),
         ),
+        // THÊM ĐOẠN NÀY VÀO:
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.receipt_long,
+              color: Color(0xFF0F5C45),
+              size: 28,
+            ),
+            tooltip: 'Lịch sử thuê máy',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const MyBookingsScreen(),
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: Column(
         children: [
