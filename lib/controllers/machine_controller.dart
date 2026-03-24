@@ -251,4 +251,9 @@ class MachineController extends ChangeNotifier {
     isLoadingStats = false;
     notifyListeners();
   }
+
+  /// Kiểm tra xem máy có đang bận không (Dùng cho UI)
+  Future<bool> checkMachineBusy(int machineId) async {
+    return await _repository.hasActiveBookings(machineId);
+  }
 }
