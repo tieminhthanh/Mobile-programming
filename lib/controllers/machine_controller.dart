@@ -181,4 +181,51 @@ class MachineController extends ChangeNotifier {
     }
     return success;
   }
+
+  // ==========================================
+  // 7. QUẢN LÝ LỊCH TRÌNH (CALENDAR LOGIC)
+  // ==========================================
+
+  Map<DateTime, List<dynamic>> calendarEvents = {};
+
+  Future<void> fetchCalendarData() async {
+    // Tạm thời OwnerId = 6
+    final bookings = await _repository.getAllOwnerBookings(6);
+
+    Map<DateTime, List<dynamic>> tempEvents = {};
+
+    for (var b in bookings) {
+      // Chuyển chuỗi StartTime thành DateTime và chỉ lấy Ngày/Tháng/Năm (bỏ giờ)
+      DateTime date = DateTime.parse(b['StartTime']);
+      DateTime dayOnly = DateTime(date.year, date.month, date.day);
+
+      if (tempEvents[dayOnly] == null) tempEvents[dayOnly] = [];
+      tempEvents[dayOnly]!.add(b);
+    }
+
+    calendarEvents = tempEvents;
+    notifyListeners();
+  }
+
+  // ==========================================
+  // 8. THỐNG KÊ (STATISTICS LOGIC)
+  // ==========================================
+  double totalRevenue = 0.0;
+  int completedOrders = 0;
+  int totalMachinesCount = 0;
+  bool isLoadingStats = false;
+
+  Future<void> fetchOwnerStats() async {
+    isLoadingStats = true;
+    notifyListeners();
+
+    final stats = await _repository.getOwnerStats(6); // Tạm thời OwnerId = 6
+
+    totalRevenue = (stats['revenue'] as num).toDouble();
+    completedOrders = stats['completed'] as int;
+    totalMachinesCount = stats['totalMachines'] as int;
+
+    isLoadingStats = false;
+    notifyListeners();
+  }
 }

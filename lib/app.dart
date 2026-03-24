@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:guardian/screens/machine/machine_calendar_screen.dart';
 import 'package:guardian/screens/machine/owner_bookings_screen.dart';
+import 'package:guardian/screens/machine/owner_dashboard_screen.dart';
 import 'package:guardian/screens/machine/owner_machine_list_screen.dart';
 import 'screens/machine/machine_list_screen.dart';
 
@@ -13,17 +15,18 @@ class GuardianApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Guardian Farm',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0F5C45)),
-        // Màu xanh rêu điểm nhấn chuẩn
-        useMaterial3: true,
-      ),
-      // Tạm thời để home là một màn hình rỗng chờ các bạn code UI
-      // home: const MachineListScreen(),
-      // home: const OwnerBookingsScreen(),
-      home: const OwnerMachineListScreen(),
+        title: 'Guardian Farm',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0F5C45)),
+          // Màu xanh rêu điểm nhấn chuẩn
+          useMaterial3: true,
+        ),
+        // Tạm thời để home là một màn hình rỗng chờ các bạn code UI
+        // home: const MachineListScreen(),
+        // home: const OwnerBookingsScreen(),
+        // home: const OwnerMachineListScreen(),
+        home: const OwnerDashboardScreen(),
 
       // Khai báo Routes chuẩn (Mở comment khi đã có màn hình)
       /*

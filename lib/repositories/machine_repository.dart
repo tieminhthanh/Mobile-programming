@@ -213,4 +213,53 @@ class MachineRepository {
       return false;
     }
   }
+
+  /// Lấy toàn bộ lịch thuê của tất cả máy thuộc sở hữu (để hiện lên Lịch)
+  Future<List<Map<String, dynamic>>> getAllOwnerBookings(int ownerId) async {
+    try {
+      const String sql = '''
+        SELECT b.*, m.MachineType 
+        FROM logistics_MachineBookings b
+        JOIN logistics_AgriMachines m ON m.MachineId = b.MachineId
+        WHERE m.OwnerId = ? AND b.Status != 'CANCELLED'
+      ''';
+      return await dbService.rawQuery(sql, [ownerId]);
+    } catch (e) {
+      print('Lỗi lấy lịch tổng quát: $e');
+      return [];
+    }
+  }
+
+  /// Lấy số liệu thống kê cho chủ máy
+  Future<Map<String, dynamic>> getOwnerStats(int ownerId) async {
+    try {
+      // 1. Tính tổng doanh thu từ các đơn đã hoàn thành
+      final revenueQuery = await dbService.rawQuery(
+        '''
+        SELECT SUM(TotalPrice) as totalRevenue, COUNT(BookingId) as completedCount
+        FROM logistics_MachineBookings b
+        JOIN logistics_AgriMachines m ON b.MachineId = m.MachineId
+        WHERE m.OwnerId = ? AND b.Status = 'COMPLETED'
+      ''',
+        [ownerId],
+      );
+
+      // 2. Đếm tổng số máy đang sở hữu
+      final machineQuery = await dbService.rawQuery(
+        '''
+        SELECT COUNT(MachineId) as machineCount FROM logistics_AgriMachines WHERE OwnerId = ?
+      ''',
+        [ownerId],
+      );
+
+      return {
+        'revenue': revenueQuery.first['totalRevenue'] ?? 0.0,
+        'completed': revenueQuery.first['completedCount'] ?? 0,
+        'totalMachines': machineQuery.first['machineCount'] ?? 0,
+      };
+    } catch (e) {
+      print('Lỗi lấy thống kê: $e');
+      return {'revenue': 0.0, 'completed': 0, 'totalMachines': 0};
+    }
+  }
 }
