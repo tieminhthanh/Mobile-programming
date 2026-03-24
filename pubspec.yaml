@@ -1,0 +1,52 @@
+name: guardian
+description: A new Flutter project.
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.10.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # HTTP client để gọi API
+  http: ^1.2.0
+
+  # Format tiền tệ, số, ngày tháng
+  intl: ^0.20.2
+
+  # SQLite database
+  sqflite: ^2.3.0
+
+  # Path helper cho SQLite
+  path: ^1.9.0
+
+  # FFI support for desktop sqflite
+  sqflite_common_ffi: ^2.4.0
+
+  # BLoC state management
+  flutter_bloc: ^8.1.2
+
+  # Charts
+  fl_chart: ^0.68.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  # assets:
+  #   - assets/images/
+
+  # fonts:
+  #   - family: ExampleFont
+  #     fonts:
+  #       - asset: fonts/Example-Regular.ttf
