@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 
 import '../../controllers/machine_controller.dart';
 import '../../core/utils/formatter.dart';
-import '../../models/agri_machine.dart';
 import 'add_edit_machine_screen.dart';
 
 class OwnerMachineListScreen extends StatefulWidget {

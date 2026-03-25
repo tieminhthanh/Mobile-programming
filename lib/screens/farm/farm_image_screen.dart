@@ -9,7 +9,6 @@ import 'package:provider/provider.dart';
 import 'package:guardian/controllers/farmer_controller.dart';
 import 'package:guardian/models/farmer_image.dart';
 import 'package:guardian/core/widgets/custom_button.dart';
-import 'package:uuid/uuid.dart';
 
 class FarmImageScreen extends StatefulWidget {
   final String referenceId; // Farmer ID hoặc Farm ID
@@ -57,7 +56,7 @@ class _FarmImageScreenState extends State<FarmImageScreen> {
     }
 
     final image = FarmerImage(
-      imageId: const Uuid().v4(),
+      imageId: DateTime.now().millisecondsSinceEpoch.toString(),
       referenceId: widget.referenceId,
       referenceType: widget.referenceType,
       imageUrl: _imageUrlController.text,

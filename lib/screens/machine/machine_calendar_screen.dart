@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/machine_controller.dart';
-import '../../core/utils/formatter.dart';
 import 'booking_detail_screen.dart';
 
 class MachineCalendarScreen extends StatefulWidget {

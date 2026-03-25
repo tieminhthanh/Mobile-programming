@@ -10,7 +10,6 @@ import 'package:guardian/controllers/farmer_controller.dart';
 import 'package:guardian/models/farmer.dart';
 import 'package:guardian/core/widgets/custom_button.dart';
 import 'package:guardian/core/widgets/custom_textfield.dart';
-import 'package:uuid/uuid.dart';
 
 class FarmerDetailScreen extends StatefulWidget {
   final Farmer? farmer;
@@ -67,7 +66,7 @@ class _FarmerDetailScreenState extends State<FarmerDetailScreen> {
     final farmer = Farmer(
       userId: _userIdController.text.isNotEmpty
           ? _userIdController.text
-          : const Uuid().v4(),
+          : DateTime.now().millisecondsSinceEpoch.toString(),
       fullName: _fullNameController.text,
       village: _villageController.text,
       contactName: _contactNameController.text.isNotEmpty
