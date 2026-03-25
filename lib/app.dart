@@ -2,6 +2,11 @@
 import 'package:google_fonts/google_fonts.dart';
 import 'package:guardian/core/widgets/auth_guard.dart';
 import 'package:guardian/models/user.dart';
+import 'package:guardian/screens/machine/machine_calendar_screen.dart';
+import 'package:guardian/screens/machine/machine_list_screen.dart';
+import 'package:guardian/screens/machine/owner_bookings_screen.dart';
+import 'package:guardian/screens/machine/owner_dashboard_screen.dart';
+import 'package:guardian/screens/machine/owner_machine_list_screen.dart';
 
 import 'routes/app_routes.dart';
 import 'screens/address/address_edit_page.dart';
@@ -217,6 +222,36 @@ class GuardianApp extends StatelessWidget {
               deniedRoute: AppRoutes.home,
               allowedRoles: [UserRole.admin, UserRole.sme],
               child: const AdminSupportPage(),
+            ),
+        '/machine-list': (context) => AuthGuard(
+              loginRoute: AppRoutes.login,
+              deniedRoute: AppRoutes.home,
+              allowedRoles: [UserRole.farmer, UserRole.sme, UserRole.admin],
+              child: const MachineListScreen(),
+            ),
+        '/owner-dashboard': (context) => AuthGuard(
+              loginRoute: AppRoutes.login,
+              deniedRoute: AppRoutes.home,
+              allowedRoles: [UserRole.sme, UserRole.admin],
+              child: const OwnerDashboardScreen(),
+            ),
+        '/owner-bookings': (context) => AuthGuard(
+              loginRoute: AppRoutes.login,
+              deniedRoute: AppRoutes.home,
+              allowedRoles: [UserRole.sme, UserRole.admin],
+              child: const OwnerBookingsScreen(),
+            ),
+        '/owner-calendar': (context) => AuthGuard(
+              loginRoute: AppRoutes.login,
+              deniedRoute: AppRoutes.home,
+              allowedRoles: [UserRole.sme, UserRole.admin],
+              child: const MachineCalendarScreen(),
+            ),
+        '/owner-machines': (context) => AuthGuard(
+              loginRoute: AppRoutes.login,
+              deniedRoute: AppRoutes.home,
+              allowedRoles: [UserRole.sme, UserRole.admin],
+              child: const OwnerMachineListScreen(),
             ),
       },
     );

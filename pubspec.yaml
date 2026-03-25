@@ -31,8 +31,12 @@ dependencies:
   # BLoC state management
   flutter_bloc: ^8.1.2
 
+  # Provider state management
+  provider: ^6.1.5+1
+
   # Charts
   fl_chart: ^0.68.0
+  table_calendar: ^3.2.0
 
   # Local session storage
   shared_preferences: ^2.2.2

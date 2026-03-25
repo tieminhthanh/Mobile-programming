@@ -49,7 +49,7 @@ class HomePage extends StatelessWidget {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Thần Hộ Mệnh'),
+            title: const Text('Guardian Farm'),
             actions: [
               IconButton(
                 tooltip: 'Tài khoản',
