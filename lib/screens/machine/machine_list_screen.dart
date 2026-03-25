@@ -67,75 +67,8 @@ class _MachineListScreenState extends State<MachineListScreen> {
       ),
       body: Column(
         children: [
-          _buildVoiceActionCard(), // Khu vực Voice-first
-          const SizedBox(height: 16),
           Expanded(
             child: _buildMachineList(), // Danh sách máy bay/máy cày...
-          ),
-        ],
-      ),
-    );
-  }
-
-  // =========================================================
-  // WIDGET 1: KHU VỰC TÌM KIẾM BẰNG GIỌNG NÓI (VOICE-FIRST)
-  // =========================================================
-  Widget _buildVoiceActionCard() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      padding: const EdgeInsets.all(24.0), // Chuẩn lưới 8pt
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text(
-                  'Bác cần giúp gì\nhôm nay?',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF333333),
-                    height: 1.3,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  'Chạm để nói (VD: "Tìm máy gặt")',
-                  style: TextStyle(fontSize: 14, color: Color(0xFF666666)),
-                ),
-              ],
-            ),
-          ),
-          // Nút Micro siêu lớn 64x64px (Chuẩn ngón tay nông dân)
-          Container(
-            width: 64,
-            height: 64,
-            decoration: const BoxDecoration(
-              color: Color(0xFF0F5C45), // Màu xanh rêu (10% Accent Color)
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              iconSize: 32,
-              color: Colors.white,
-              icon: const Icon(Icons.mic),
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Đang lắng nghe...')),
-                );
-              },
-            ),
           ),
         ],
       ),
