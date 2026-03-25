@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
 import 'package:guardian/routes/app_routes.dart';
-import '../../core/utils/formatter.dart';
 import '../../controllers/product_controller.dart';
-import '../../repositories/commerce_repository.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});

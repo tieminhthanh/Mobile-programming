@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../controllers/cart_controller.dart';
 import '../../models/order_model.dart';
 import '../../repositories/commerce_repository.dart';
 import '../../core/utils/formatter.dart';

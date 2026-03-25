@@ -22,7 +22,6 @@ void main() async {
     databaseFactory = databaseFactoryFfi;
   }
 
-  // Initialize session first (auth system)
   await SessionController.instance.init();
 
   // Initialize database and repositories
@@ -36,7 +35,7 @@ void main() async {
       providers: [
         // Machine rental feature
         ChangeNotifierProvider(create: (_) => MachineController(machineRepo)),
-        
+
         // Marketplace feature
         Provider<CommerceRepository>.value(value: commerceRepository),
         ChangeNotifierProvider<ProductController>(

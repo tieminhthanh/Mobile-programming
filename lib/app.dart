@@ -85,7 +85,7 @@ class GuardianApp extends StatelessWidget {
     }
 
     return MaterialApp(
-      title: 'Guardian Marketplace',
+      title: 'Thần Hộ Mệnh',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: colorScheme,

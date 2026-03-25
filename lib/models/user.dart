@@ -12,7 +12,6 @@ extension UserRoleLabel on UserRole {
       case UserRole.sme:
         return 'Doanh nghiệp';
       case UserRole.farmer:
-      default:
         return 'Nông dân';
     }
   }
