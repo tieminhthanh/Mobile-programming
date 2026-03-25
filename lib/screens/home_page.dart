@@ -95,15 +95,7 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 24),
             ],
           ),
-          bottomNavigationBar: BottomNavigationBar(
-            currentIndex: 0,
-            items: const [
-              BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Tổng quan'),
-              BottomNavigationBarItem(icon: Icon(Icons.handshake_outlined), label: 'Dịch vụ'),
-              BottomNavigationBarItem(icon: Icon(Icons.notifications_outlined), label: 'Cảnh báo'),
-              BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Hồ sơ'),
-            ],
-          ),
+        
         );
       },
     );

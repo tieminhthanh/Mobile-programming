@@ -173,46 +173,70 @@ class _CartScreenState extends State<CartScreen> {
 
   // Widget: Bottom Checkout
   Widget _buildBottomCheckout(double total, List<CartItemModel> items) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, -2))],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Some parent layouts can give unbounded constraints; make the checkout bar robust
+        // by ensuring finite width/height for the `ElevatedButton`.
+        final effectiveMaxWidth = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : MediaQuery.sizeOf(context).width;
+        final maxButtonWidth = (effectiveMaxWidth * 0.45).clamp(160.0, 340.0);
+
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: const [
+              BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, -2))
+            ],
+          ),
+          child: SizedBox(
+            height: 60, // Prevent infinite height constraints on the button.
+            child: Row(
               children: [
-                const Text('Tổng thanh toán', style: TextStyle(color: Colors.grey)),
-                Text(AppFormatter.currency(total),
-                    style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary)),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('Tổng thanh toán', style: TextStyle(color: Colors.grey)),
+                      Text(AppFormatter.currency(total),
+                          style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary)),
+                    ],
+                  ),
+                ),
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxButtonWidth),
+                  child: ElevatedButton(
+                    onPressed: items.isEmpty
+                        ? null
+                        : () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    CheckoutScreen(selectedItems: items, totalAmount: total),
+                              ),
+                            ),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: Text(
+                      'Mua hàng (${items.length})',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
-          ElevatedButton(
-            onPressed: items.isEmpty
-                ? null
-                : () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => CheckoutScreen(selectedItems: items, totalAmount: total),
-                      ),
-                    ),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Colors.white,
-            ),
-            child: Text('Mua hàng (${items.length})'),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
