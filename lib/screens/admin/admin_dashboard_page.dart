@@ -46,12 +46,12 @@ class AdminDashboardPage extends StatelessWidget {
             title: const Text('Trung tâm điều hành'),
             actions: [
               TextButton(
-                onPressed: () async {
-                  await SessionController.instance.logout();
-                  if (!context.mounted) {
-                    return;
-                  }
-                  Navigator.of(context).pushReplacementNamed(AppRoutes.login);
+                onPressed: () {
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                    AppRoutes.login,
+                    (route) => false,
+                  );
+                  SessionController.instance.logout();
                 },
                 child: const Text('Đăng xuất'),
               ),

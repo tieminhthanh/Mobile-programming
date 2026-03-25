@@ -16,6 +16,7 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   String? _errorText;
   bool _isLoading = false;
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -60,7 +61,10 @@ class _LoginPageState extends State<LoginPage> {
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Đăng nhập')),
+      appBar: AppBar(
+        title: const Text('Đăng nhập'),
+        automaticallyImplyLeading: false,
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -101,10 +105,20 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 10),
                     TextFormField(
                       controller: _passwordController,
-                      obscureText: true,
-                      decoration: const InputDecoration(
-                        prefixIcon: Icon(Icons.lock_outline),
+                      obscureText: _obscurePassword,
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.lock_outline),
                         labelText: 'Mật khẩu',
+                        suffixIcon: IconButton(
+                          onPressed: () => setState(
+                            () => _obscurePassword = !_obscurePassword,
+                          ),
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                          ),
+                        ),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {

@@ -49,10 +49,12 @@ class _HomePageState extends State<HomePage> {
                 icon: const Icon(Icons.account_circle_outlined),
               ),
               TextButton(
-                onPressed: () async {
-                  await SessionController.instance.logout();
-                  if (!context.mounted) return;
-                  Navigator.of(context).pushReplacementNamed(AppRoutes.login);
+                onPressed: () {
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                    AppRoutes.login,
+                    (route) => false,
+                  );
+                  SessionController.instance.logout();
                 },
                 child: const Text('Đăng xuất'),
               ),
@@ -66,13 +68,6 @@ class _HomePageState extends State<HomePage> {
                 roleTitle: _roleTitle(user?.role),
                 roleHint: _roleHint(user?.role),
                 roleColor: _roleColor(user?.role),
-                onStart: () =>
-                    Navigator.of(context).pushNamed(switch (user?.role) {
-                      UserRole.admin => AppRoutes.adminDashboard,
-                      UserRole.sme =>
-                        AppRoutes.ownerMachines, // Vào thẳng Kho máy cho SME
-                      UserRole.farmer || null => AppRoutes.machineList,
-                    }),
               ),
               const SizedBox(height: 24),
 
@@ -239,11 +234,6 @@ class _HomePageState extends State<HomePage> {
           onTap: () =>
               Navigator.of(context).pushNamed(AppRoutes.changePassword),
         ),
-        _QuickAction(
-          label: 'Thông tin cá nhân',
-          icon: Icons.badge_outlined,
-          onTap: () => Navigator.of(context).pushNamed(AppRoutes.profile),
-        ),
       ];
     }
 
@@ -296,12 +286,10 @@ class _HeroCard extends StatelessWidget {
     required this.roleTitle,
     required this.roleHint,
     required this.roleColor,
-    required this.onStart,
   });
 
   final String displayName, roleTitle, roleHint;
   final Color roleColor;
-  final VoidCallback onStart;
 
   @override
   Widget build(BuildContext context) {
@@ -334,15 +322,6 @@ class _HeroCard extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                   fontSize: 12,
                 ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              height: 48,
-              child: ElevatedButton.icon(
-                onPressed: onStart,
-                icon: const Icon(Icons.rocket_launch_outlined),
-                label: const Text('Bắt đầu ngay'),
               ),
             ),
           ],

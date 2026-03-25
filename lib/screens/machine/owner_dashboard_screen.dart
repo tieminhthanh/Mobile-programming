@@ -41,10 +41,12 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                     context.read<MachineController>().fetchOwnerStats(),
               ),
               TextButton(
-                onPressed: () async {
-                  await SessionController.instance.logout();
-                  if (!context.mounted) return;
-                  Navigator.of(context).pushReplacementNamed(AppRoutes.login);
+                onPressed: () {
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                    AppRoutes.login,
+                    (route) => false,
+                  );
+                  SessionController.instance.logout();
                 },
                 child: const Text('Đăng xuất'),
               ),

@@ -6,12 +6,12 @@ import 'package:guardian/routes/app_routes.dart';
 class LogoutPage extends StatelessWidget {
   const LogoutPage({super.key});
 
-  Future<void> _handleLogout(BuildContext context) async {
-    await SessionController.instance.logout();
-    if (!context.mounted) {
-      return;
-    }
-    Navigator.of(context).pushReplacementNamed(AppRoutes.login);
+  void _handleLogout(BuildContext context) {
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      AppRoutes.login,
+      (route) => false,
+    );
+    SessionController.instance.logout();
   }
 
   @override
