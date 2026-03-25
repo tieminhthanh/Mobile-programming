@@ -40,6 +40,13 @@ class Migrations {
         );
       } catch (_) {}
     }
+
+    // Version 3+ - Add CreatedAt to FarmerProfiles
+    if (oldVersion < 3) {
+      try {
+        await db.execute('ALTER TABLE FarmerProfiles ADD COLUMN CreatedAt TEXT');
+      } catch (_) {}
+    }
   }
 
   // =======================================================
@@ -86,13 +93,13 @@ class Migrations {
 
     await db.execute('''
       CREATE TABLE IF NOT EXISTS FarmerProfiles (
-        UserId         INTEGER PRIMARY KEY,
+        UserId         TEXT PRIMARY KEY,
         FullName       TEXT    NOT NULL,
         Village        TEXT,
         ContactName    TEXT,
         ContactPhone   TEXT,
-        PreferredVoice INTEGER DEFAULT 1,
-        FOREIGN KEY (UserId) REFERENCES Users(UserId)
+        PreferredVoice TEXT,
+        CreatedAt      TEXT
       );
     ''');
 

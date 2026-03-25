@@ -20,7 +20,7 @@ class DatabaseConfig {
   const DatabaseConfig({required this.name, required this.version});
 }
 
-const databaseConfig = DatabaseConfig(name: 'prm393.db', version: 2);
+const databaseConfig = DatabaseConfig(name: 'prm393.db', version: 3);
 
 // =============================================================
 // DATABASE PROVIDER

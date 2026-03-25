@@ -75,6 +75,7 @@ final farmerProfilesTable = TableSchema(
     'contactName': 'ContactName',
     'contactPhone': 'ContactPhone',
     'preferredVoice': 'PreferredVoice',
+    'createdAt': 'CreatedAt',
   },
 );
 
