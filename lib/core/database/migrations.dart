@@ -329,8 +329,8 @@ class Migrations {
       ['0911000002', 'sme2@agri.vn',     'SME',    'Công Ty Cơ Khí Vina'],
       ['0911000003', 'sme3@agri.vn',     'SME',    'Phân Bón Miền Nam'],
       ['0911000004', 'sme4@agri.vn',     'SME',    'Logistics Nông Thôn'],
-      ['0888000001', 'admin1@system.com','ADMIN',  'Admin Vận Hành'],
-      ['0888000002', 'admin2@system.com','ADMIN',  'Admin Kỹ Thuật'],
+      ['0000000001', 'admin1@system.com','ADMIN',  'Admin Vận Hành'],
+      ['0000000002', 'admin2@system.com','ADMIN',  'Admin Kỹ Thuật'],
     ];
     for (final u in users) {
       batch.insert('Users', {
