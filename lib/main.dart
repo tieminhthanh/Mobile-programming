@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -8,7 +8,9 @@ import 'package:guardian/repositories/machine_repository.dart';
 import 'package:guardian/controllers/product_controller.dart';
 import 'package:guardian/controllers/cart_controller.dart';
 import 'package:guardian/controllers/machine_controller.dart';
+import 'package:guardian/controllers/farmer_controller.dart';
 import 'package:guardian/controllers/session_controller.dart';
+import 'package:guardian/repositories/farmer_repository.dart';
 import 'package:guardian/app.dart';
 
 void main() async {
@@ -29,6 +31,7 @@ void main() async {
   final dbService = DatabaseService(dbProvider);
   final machineRepo = MachineRepository(dbService);
   final commerceRepository = CommerceRepository(dbService);
+  final farmerRepository = FarmerRepository(dbService: dbService);
 
   runApp(
     MultiProvider(
@@ -47,6 +50,11 @@ void main() async {
           create: (_) => CartController(
             repository: commerceRepository,
           ),
+        ),
+
+        // Smart Farm feature
+        ChangeNotifierProvider<FarmerController>(
+          create: (_) => FarmerController(repository: farmerRepository),
         ),
       ],
       child: const GuardianApp(),

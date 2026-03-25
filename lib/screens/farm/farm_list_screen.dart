@@ -24,6 +24,7 @@ class FarmListScreen extends StatefulWidget {
 class _FarmListScreenState extends State<FarmListScreen> {
   final TextEditingController _searchController = TextEditingController();
   late FarmerController _controller;
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -47,11 +48,9 @@ class _FarmListScreenState extends State<FarmListScreen> {
   }
 
   void _onSearchChanged(String query) {
-    if (query.isEmpty) {
-      _loadFarms();
-    } else {
-      _controller.searchFarms(query);
-    }
+    setState(() {
+      _searchQuery = query.trim().toLowerCase();
+    });
   }
 
   @override
@@ -64,6 +63,16 @@ class _FarmListScreenState extends State<FarmListScreen> {
       ),
       body: Consumer<FarmerController>(
         builder: (context, controller, child) {
+          final visibleFarms = controller.farms.where((farm) {
+            if (_searchQuery.isEmpty) return true;
+            final name = farm.farmName.toLowerCase();
+            final location = farm.location.toLowerCase();
+            final crop = farm.cropType.toLowerCase();
+            return name.contains(_searchQuery) ||
+                location.contains(_searchQuery) ||
+                crop.contains(_searchQuery);
+          }).toList();
+
           if (controller.isLoading && controller.farms.isEmpty) {
             return const Center(child: LoadingWidget());
           }
@@ -119,7 +128,7 @@ class _FarmListScreenState extends State<FarmListScreen> {
 
               // Farms List
               Expanded(
-                child: controller.farms.isEmpty
+                child: visibleFarms.isEmpty
                     ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -141,10 +150,10 @@ class _FarmListScreenState extends State<FarmListScreen> {
                       )
                     : ListView.separated(
                         padding: const EdgeInsets.all(16),
-                        itemCount: controller.farms.length,
+                        itemCount: visibleFarms.length,
                         separatorBuilder: (_, __) => const SizedBox(height: 12),
                         itemBuilder: (context, index) {
-                          final farm = controller.farms[index];
+                          final farm = visibleFarms[index];
                           return FarmCard(
                             farm: farm,
                             onTap: () => _navigateToDetailScreen(farm),

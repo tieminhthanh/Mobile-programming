@@ -4,6 +4,10 @@ import 'package:guardian/controllers/session_controller.dart';
 import 'package:guardian/controllers/machine_controller.dart';
 import 'package:guardian/models/user.dart';
 import 'package:guardian/routes/app_routes.dart';
+import 'package:guardian/screens/farm/farm_detail_screen.dart';
+import 'package:guardian/screens/farm/farm_image_screen.dart';
+import 'package:guardian/screens/farm/farm_list_screen.dart';
+import 'package:guardian/screens/farm/farmer_detail_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -83,6 +87,15 @@ class _HomePageState extends State<HomePage> {
               _SectionHeader(title: isSME ? 'Hiệu suất kinh doanh' : 'Tổng quan nhanh'),
               const SizedBox(height: 12),
               isSME ? _SMEMetricsGrid() : _FarmerMetricsRow(user: user),
+
+              const SizedBox(height: 24),
+              _SectionHeader(title: '🏡 Farm (Smart Farm)'),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: _farmQuickActions(context),
+              ),
 
               const SizedBox(height: 24),
               _SectionHeader(title: 'Chức năng chính'),
@@ -166,6 +179,56 @@ class _HomePageState extends State<HomePage> {
       _QuickAction(label: 'Địa chỉ', icon: Icons.place_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.addressList)),
       _QuickAction(label: 'Mật khẩu', icon: Icons.lock_reset_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.changePassword)),
       _QuickAction(label: 'Cá nhân', icon: Icons.badge_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.profile)),
+    ];
+  }
+
+  List<_QuickAction> _farmQuickActions(BuildContext context) {
+    final sessionUser = SessionController.instance.currentUser.value;
+    final farmerScopeId = (sessionUser?.role == UserRole.admin)
+        ? null
+        : sessionUser?.id.toString();
+
+    // Note: các màn hình farm hiện đang được tạo sẵn (list/detail/image/farmer).
+    // Ở Home, ta điều hướng thẳng sang màn hình tương ứng để người dùng tự chọn dữ liệu.
+    return [
+      _QuickAction(
+        label: 'Xem danh sách trang trại',
+        icon: Icons.landscape_outlined,
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => FarmListScreen(farmerId: farmerScopeId),
+          ),
+        ),
+      ),
+      _QuickAction(
+        label: 'Thêm trang trại',
+        icon: Icons.edit_location_alt_outlined,
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => FarmDetailScreen(farmerId: farmerScopeId),
+          ),
+        ),
+      ),
+      _QuickAction(
+        label: 'Xem ảnh trang trại',
+        icon: Icons.image_outlined,
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const FarmImageScreen(
+              referenceId: '0',
+              referenceType: 'Farm',
+              title: 'Trang trại',
+            ),
+          ),
+        ),
+      ),
+      _QuickAction(
+        label: 'Thông tin nông dân',
+        icon: Icons.person_outline,
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const FarmerDetailScreen()),
+        ),
+      ),
     ];
   }
 
