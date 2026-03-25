@@ -42,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
     }
     if (result.status == LoginStatus.success && result.user != null) {
       final target = switch (result.user!.role) {
-        UserRole.sme => AppRoutes.ownerDashboard,
+        UserRole.sme => AppRoutes.home,
         UserRole.admin => AppRoutes.adminDashboard,
         UserRole.farmer => AppRoutes.home,
       };

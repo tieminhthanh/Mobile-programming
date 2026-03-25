@@ -52,9 +52,23 @@ class GuardianApp extends StatelessWidget {
     );
 
     final baseTextTheme = GoogleFonts.beVietnamProTextTheme();
+    const ownerRoles = [UserRole.sme, UserRole.admin];
+
+    Widget guarded(
+      Widget child, {
+      List<UserRole>? roles,
+      String? deniedRoute,
+    }) {
+      return AuthGuard(
+        loginRoute: AppRoutes.login,
+        deniedRoute: deniedRoute ?? AppRoutes.home,
+        allowedRoles: roles ?? const <UserRole>[],
+        child: child,
+      );
+    }
 
     return MaterialApp(
-      title: 'Thần Hộ Mệnh',
+      title: 'Guardian Farm',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: colorScheme,
@@ -167,104 +181,65 @@ class GuardianApp extends StatelessWidget {
       ),
       initialRoute: AppRoutes.login,
       routes: {
-        AppRoutes.home: (context) => AuthGuard(
-          loginRoute: AppRoutes.login,
-          deniedRoute: AppRoutes.home,
-          allowedRoles: [UserRole.farmer, UserRole.sme, UserRole.admin],
-          child: const HomePage(),
+        AppRoutes.home: (context) => guarded(
+          const HomePage(),
+          roles: const [UserRole.farmer, UserRole.sme, UserRole.admin],
         ),
         AppRoutes.login: (context) => const LoginPage(),
         AppRoutes.register: (context) => const RegisterPage(),
-        AppRoutes.logout: (context) => AuthGuard(
-          loginRoute: AppRoutes.login,
-          deniedRoute: AppRoutes.home,
-          child: const LogoutPage(),
+        AppRoutes.logout: (context) => guarded(const LogoutPage()),
+        AppRoutes.changePassword: (context) => guarded(
+          const ChangePasswordPage(),
         ),
-        AppRoutes.changePassword: (context) => AuthGuard(
-          loginRoute: AppRoutes.login,
-          deniedRoute: AppRoutes.home,
-          child: const ChangePasswordPage(),
+        AppRoutes.profile: (context) => guarded(const ProfilePage()),
+        AppRoutes.userList: (context) => guarded(
+          const UserListPage(),
+          roles: const [UserRole.admin],
         ),
-        AppRoutes.profile: (context) => AuthGuard(
-          loginRoute: AppRoutes.login,
-          deniedRoute: AppRoutes.home,
-          child: const ProfilePage(),
+        AppRoutes.userLock: (context) => guarded(
+          const UserLockPage(),
+          roles: const [UserRole.admin],
         ),
-        AppRoutes.userList: (context) => AuthGuard(
-          loginRoute: AppRoutes.login,
-          deniedRoute: AppRoutes.home,
-          allowedRoles: [UserRole.admin],
-          child: const UserListPage(),
-        ),
-        AppRoutes.userLock: (context) => AuthGuard(
-          loginRoute: AppRoutes.login,
-          deniedRoute: AppRoutes.home,
-          allowedRoles: [UserRole.admin],
-          child: const UserLockPage(),
-        ),
-        AppRoutes.addressList: (context) => AuthGuard(
-          loginRoute: AppRoutes.login,
-          deniedRoute: AppRoutes.home,
-          child: const AddressListPage(),
-        ),
-        AppRoutes.addressEdit: (context) => AuthGuard(
-          loginRoute: AppRoutes.login,
+        AppRoutes.addressList: (context) => guarded(const AddressListPage()),
+        AppRoutes.addressEdit: (context) => guarded(
+          const AddressEditPage(),
           deniedRoute: AppRoutes.addressList,
-          child: const AddressEditPage(),
         ),
-        AppRoutes.enterpriseProfile: (context) => AuthGuard(
-          loginRoute: AppRoutes.login,
-          deniedRoute: AppRoutes.home,
-          allowedRoles: [UserRole.admin, UserRole.sme],
-          child: const EnterpriseProfilePage(),
+        AppRoutes.enterpriseProfile: (context) => guarded(
+          const EnterpriseProfilePage(),
+          roles: ownerRoles,
         ),
-        AppRoutes.adminDashboard: (context) => AuthGuard(
-          loginRoute: AppRoutes.login,
-          deniedRoute: AppRoutes.home,
-          allowedRoles: [UserRole.admin],
-          child: const AdminDashboardPage(),
+        AppRoutes.adminDashboard: (context) => guarded(
+          const AdminDashboardPage(),
+          roles: const [UserRole.admin],
         ),
-        AppRoutes.systemStats: (context) => AuthGuard(
-          loginRoute: AppRoutes.login,
-          deniedRoute: AppRoutes.home,
-          allowedRoles: [UserRole.admin, UserRole.sme],
-          child: const SystemStatsPage(),
+        AppRoutes.systemStats: (context) => guarded(
+          const SystemStatsPage(),
+          roles: ownerRoles,
         ),
-        AppRoutes.adminSupport: (context) => AuthGuard(
-          loginRoute: AppRoutes.login,
-          deniedRoute: AppRoutes.home,
-          allowedRoles: [UserRole.admin, UserRole.sme],
-          child: const AdminSupportPage(),
+        AppRoutes.adminSupport: (context) => guarded(
+          const AdminSupportPage(),
+          roles: ownerRoles,
         ),
-        AppRoutes.machineList: (context) => AuthGuard(
-          loginRoute: AppRoutes.login,
-          deniedRoute: AppRoutes.home,
-          allowedRoles: [UserRole.farmer, UserRole.sme, UserRole.admin],
-          child: const MachineListScreen(),
+        AppRoutes.machineList: (context) => guarded(
+          const MachineListScreen(),
+          roles: const [UserRole.farmer, UserRole.sme, UserRole.admin],
         ),
-        AppRoutes.ownerDashboard: (context) => AuthGuard(
-          loginRoute: AppRoutes.login,
-          deniedRoute: AppRoutes.home,
-          allowedRoles: [UserRole.sme, UserRole.admin],
-          child: const OwnerDashboardScreen(),
+        AppRoutes.ownerDashboard: (context) => guarded(
+          const OwnerDashboardScreen(),
+          roles: ownerRoles,
         ),
-        AppRoutes.ownerBookings: (context) => AuthGuard(
-          loginRoute: AppRoutes.login,
-          deniedRoute: AppRoutes.home,
-          allowedRoles: [UserRole.sme, UserRole.admin],
-          child: const OwnerBookingsScreen(),
+        AppRoutes.ownerBookings: (context) => guarded(
+          const OwnerBookingsScreen(),
+          roles: ownerRoles,
         ),
-        AppRoutes.ownerCalendar: (context) => AuthGuard(
-          loginRoute: AppRoutes.login,
-          deniedRoute: AppRoutes.home,
-          allowedRoles: [UserRole.sme, UserRole.admin],
-          child: const MachineCalendarScreen(),
+        AppRoutes.ownerCalendar: (context) => guarded(
+          const MachineCalendarScreen(),
+          roles: ownerRoles,
         ),
-        AppRoutes.ownerMachines: (context) => AuthGuard(
-          loginRoute: AppRoutes.login,
-          deniedRoute: AppRoutes.home,
-          allowedRoles: [UserRole.sme, UserRole.admin],
-          child: const OwnerMachineListScreen(),
+        AppRoutes.ownerMachines: (context) => guarded(
+          const OwnerMachineListScreen(),
+          roles: ownerRoles,
         ),
       },
     );
