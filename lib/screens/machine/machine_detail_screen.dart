@@ -81,8 +81,20 @@ class _MachineDetailScreenState extends State<MachineDetailScreen> {
     );
 
     // Gọi hàm lưu vào SQLite
+    final machineId = widget.machine.machineId;
+    if (machineId == null) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Lỗi dữ liệu: mã máy không hợp lệ.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     final success = await controller.createBooking(
-      machineId: widget.machine.machineId!,
+      machineId: machineId,
       start: _startTime!,
       end: _endTime!,
       totalPrice: totalPrice,
@@ -101,9 +113,10 @@ class _MachineDetailScreenState extends State<MachineDetailScreen> {
       );
       Navigator.pop(context); // Quay lại trang danh sách máy
     } else {
+      final errMsg = context.read<MachineController>().bookingErrorMessage;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Có lỗi xảy ra, vui lòng thử lại!'),
+        SnackBar(
+          content: Text(errMsg ?? 'Có lỗi xảy ra, vui lòng thử lại!'),
           backgroundColor: Colors.red,
         ),
       );

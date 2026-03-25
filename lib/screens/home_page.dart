@@ -173,7 +173,28 @@ class _HomePageState extends State<HomePage> {
     }
 
     return [
-      _QuickAction(label: 'Thuê máy', icon: Icons.agriculture_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.machineList)),
+      _QuickAction(
+        label: 'Thuê máy',
+        icon: Icons.agriculture_outlined,
+        onTap: () {
+          // Tạm thời hoãn chức năng gốc, ghi chú để dễ rollback
+          // Navigator.of(context).pushNamed(AppRoutes.machineList);
+
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Tính năng đang phát triển'),
+              content: const Text('Tính năng Thuê máy hiện đang trong quá trình phát triển. Vui lòng chờ bản cập nhật tiếp theo.'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Đóng'),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
       _QuickAction(label: 'Xem sản phẩm', icon: Icons.storefront_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.marketplace)),
       _QuickAction(label: 'Giỏ hàng', icon: Icons.shopping_cart_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.marketplaceCart)),
       _QuickAction(label: 'Địa chỉ', icon: Icons.place_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.addressList)),

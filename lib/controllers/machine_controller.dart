@@ -52,6 +52,8 @@ class MachineController extends ChangeNotifier {
   String? errorMessage;
   List<AgriMachine> availableMachines = [];
 
+  String? bookingErrorMessage; // Lỗi khi đặt máy
+
   // ==========================================
   // 2. CÁC HÀM XỬ LÝ LOGIC (BUSINESS LOGIC)
   // ==========================================
@@ -96,6 +98,11 @@ class MachineController extends ChangeNotifier {
     // Chỉ Nông dân (hoặc SME/Admin) mới được đặt máy
     if (user == null) return false;
 
+    if (machineId <= 0) {
+      print('MachineController.createBooking: machineId không hợp lệ ($machineId)');
+      return false;
+    }
+
     final success = await _repository.bookMachine(
       machineId: machineId,
       farmId: user.id,
@@ -105,6 +112,13 @@ class MachineController extends ChangeNotifier {
       endTime: end.toIso8601String(),
       totalPrice: totalPrice,
     );
+
+    if (!success) {
+      bookingErrorMessage = 'Không thể tạo booking (db insert lỗi hoặc constraint).';
+      print('MachineController.createBooking failed: machineId=$machineId');
+    } else {
+      bookingErrorMessage = null;
+    }
 
     return success;
   }

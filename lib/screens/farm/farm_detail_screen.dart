@@ -49,15 +49,32 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
     try {
       final controller = context.read<FarmerController>();
       await controller.loadFarmers();
-      
+
+      final rawFarmers = controller.farmers;
+      final Map<String, Farmer> uniqueById = {};
+      for (final farmer in rawFarmers) {
+        if (!uniqueById.containsKey(farmer.userId)) {
+          uniqueById[farmer.userId] = farmer;
+        }
+      }
+
       setState(() {
-        _farmersList = controller.farmers;
+        _farmersList = uniqueById.values.toList();
+
         // Set default selected farmer if editing
         if (widget.farm != null) {
           _selectedFarmerId = widget.farm!.farmerId;
         } else if (widget.farmerId != null) {
           _selectedFarmerId = widget.farmerId;
         }
+
+        // If the currently selected farmer is not available in de-duped list,
+        // fall back to first option or null.
+        if (_selectedFarmerId != null &&
+            !_farmersList.any((f) => f.userId == _selectedFarmerId)) {
+          _selectedFarmerId = _farmersList.isNotEmpty ? _farmersList.first.userId : null;
+        }
+
         _farmersLoading = false;
       });
     } catch (e) {
