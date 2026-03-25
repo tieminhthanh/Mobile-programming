@@ -49,4 +49,24 @@ class AgriMachine {
       // Lưu ý: Không đưa imageUrl vào đây vì cột này thuộc bảng Images, không thuộc bảng AgriMachines
     };
   }
+
+  AgriMachine copyWith({
+    int? machineId,
+    int? ownerId,
+    String? machineType,
+    String? description,
+    double? basePricePerHour,
+    int? isApproved,
+    String? imageUrl,
+  }) {
+    return AgriMachine(
+      machineId: machineId ?? this.machineId,
+      ownerId: ownerId ?? this.ownerId,
+      machineType: machineType ?? this.machineType,
+      description: description ?? this.description,
+      basePricePerHour: basePricePerHour ?? this.basePricePerHour,
+      isApproved: isApproved ?? this.isApproved,
+      imageUrl: imageUrl ?? this.imageUrl,
+    );
+  }
 }
