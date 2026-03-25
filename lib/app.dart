@@ -208,7 +208,7 @@ class GuardianApp extends StatelessWidget {
         AppRoutes.adminDashboard: (context) => AuthGuard(
               loginRoute: AppRoutes.login,
               deniedRoute: AppRoutes.home,
-              allowedRoles: [UserRole.admin, UserRole.sme],
+            allowedRoles: [UserRole.admin],
               child: const AdminDashboardPage(),
             ),
         AppRoutes.systemStats: (context) => AuthGuard(
@@ -223,31 +223,31 @@ class GuardianApp extends StatelessWidget {
               allowedRoles: [UserRole.admin, UserRole.sme],
               child: const AdminSupportPage(),
             ),
-        '/machine-list': (context) => AuthGuard(
+        AppRoutes.machineList: (context) => AuthGuard(
               loginRoute: AppRoutes.login,
               deniedRoute: AppRoutes.home,
               allowedRoles: [UserRole.farmer, UserRole.sme, UserRole.admin],
               child: const MachineListScreen(),
             ),
-        '/owner-dashboard': (context) => AuthGuard(
+        AppRoutes.ownerDashboard: (context) => AuthGuard(
               loginRoute: AppRoutes.login,
               deniedRoute: AppRoutes.home,
               allowedRoles: [UserRole.sme, UserRole.admin],
               child: const OwnerDashboardScreen(),
             ),
-        '/owner-bookings': (context) => AuthGuard(
+        AppRoutes.ownerBookings: (context) => AuthGuard(
               loginRoute: AppRoutes.login,
               deniedRoute: AppRoutes.home,
               allowedRoles: [UserRole.sme, UserRole.admin],
               child: const OwnerBookingsScreen(),
             ),
-        '/owner-calendar': (context) => AuthGuard(
+        AppRoutes.ownerCalendar: (context) => AuthGuard(
               loginRoute: AppRoutes.login,
               deniedRoute: AppRoutes.home,
               allowedRoles: [UserRole.sme, UserRole.admin],
               child: const MachineCalendarScreen(),
             ),
-        '/owner-machines': (context) => AuthGuard(
+        AppRoutes.ownerMachines: (context) => AuthGuard(
               loginRoute: AppRoutes.login,
               deniedRoute: AppRoutes.home,
               allowedRoles: [UserRole.sme, UserRole.admin],

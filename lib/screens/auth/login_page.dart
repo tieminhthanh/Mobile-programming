@@ -41,11 +41,11 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
     if (result.status == LoginStatus.success && result.user != null) {
-      final target =
-          result.user!.role == UserRole.admin ||
-              result.user!.role == UserRole.sme
-          ? AppRoutes.adminDashboard
-          : AppRoutes.home;
+      final target = switch (result.user!.role) {
+        UserRole.sme => AppRoutes.ownerDashboard,
+        UserRole.admin => AppRoutes.adminDashboard,
+        UserRole.farmer => AppRoutes.home,
+      };
       Navigator.of(context).pushReplacementNamed(target);
       return;
     }

@@ -18,30 +18,7 @@ class HomePage extends StatelessWidget {
     return ValueListenableBuilder<AppUser?>(
       valueListenable: SessionController.instance.currentUser,
       builder: (context, user, _) {
-        final quickActions = <_QuickAction>[
-          if (user != null &&
-              (user.role == UserRole.admin || user.role == UserRole.sme))
-            _QuickAction(
-              label: 'Bảng điều khiển quản trị',
-              icon: Icons.dashboard_outlined,
-              onTap: () => Navigator.of(context).pushNamed(AppRoutes.adminDashboard),
-            ),
-          _QuickAction(
-            label: 'Quản lý địa chỉ',
-            icon: Icons.place_outlined,
-            onTap: () => Navigator.of(context).pushNamed(AppRoutes.addressList),
-          ),
-          _QuickAction(
-            label: 'Đổi mật khẩu',
-            icon: Icons.lock_reset_outlined,
-            onTap: () => Navigator.of(context).pushNamed(AppRoutes.changePassword),
-          ),
-          _QuickAction(
-            label: 'Thông tin cá nhân',
-            icon: Icons.badge_outlined,
-            onTap: () => Navigator.of(context).pushNamed(AppRoutes.profile),
-          ),
-        ];
+        final quickActions = _roleQuickActions(context, user);
 
         final roleTitle = _roleTitle(user?.role);
         final roleHint = _roleHint(user?.role);
@@ -76,6 +53,13 @@ class HomePage extends StatelessWidget {
                 roleTitle: roleTitle,
                 roleHint: roleHint,
                 roleColor: roleColor,
+                onStart: () => Navigator.of(context).pushNamed(
+                  switch (user?.role) {
+                    UserRole.admin => AppRoutes.adminDashboard,
+                    UserRole.sme => AppRoutes.ownerDashboard,
+                    UserRole.farmer || null => AppRoutes.machineList,
+                  },
+                ),
               ),
               const SizedBox(height: 20),
               _SectionHeader(title: 'Tổng quan nhanh'),
@@ -149,9 +133,11 @@ class HomePage extends StatelessWidget {
                 user: user,
                 onOpen: () {
                   final role = user?.role;
-                  final route = role == UserRole.admin || role == UserRole.sme
-                      ? AppRoutes.adminDashboard
-                      : AppRoutes.home;
+                  final route = switch (role) {
+                    UserRole.admin => AppRoutes.adminDashboard,
+                    UserRole.sme => AppRoutes.ownerDashboard,
+                    UserRole.farmer || null => AppRoutes.machineList,
+                  };
                   Navigator.of(context).pushNamed(route);
                 },
               ),
@@ -221,6 +207,102 @@ class HomePage extends StatelessWidget {
     );
   }
 
+  List<_QuickAction> _roleQuickActions(BuildContext context, AppUser? user) {
+    final role = user?.role;
+    if (role == UserRole.admin) {
+      return [
+        _QuickAction(
+          label: 'Bảng điều khiển quản trị',
+          icon: Icons.dashboard_outlined,
+          onTap: () => Navigator.of(context).pushNamed(AppRoutes.adminDashboard),
+        ),
+        _QuickAction(
+          label: 'Danh sách người dùng',
+          icon: Icons.groups_outlined,
+          onTap: () => Navigator.of(context).pushNamed(AppRoutes.userList),
+        ),
+        _QuickAction(
+          label: 'Khóa/Mở khóa tài khoản',
+          icon: Icons.lock_person_outlined,
+          onTap: () => Navigator.of(context).pushNamed(AppRoutes.userLock),
+        ),
+        _QuickAction(
+          label: 'Thống kê hệ thống',
+          icon: Icons.bar_chart_outlined,
+          onTap: () => Navigator.of(context).pushNamed(AppRoutes.systemStats),
+        ),
+        _QuickAction(
+          label: 'Hỗ trợ quản trị',
+          icon: Icons.support_agent_outlined,
+          onTap: () => Navigator.of(context).pushNamed(AppRoutes.adminSupport),
+        ),
+        _QuickAction(
+          label: 'Thông tin cá nhân',
+          icon: Icons.badge_outlined,
+          onTap: () => Navigator.of(context).pushNamed(AppRoutes.profile),
+        ),
+      ];
+    }
+
+    if (role == UserRole.sme) {
+      return [
+        _QuickAction(
+          label: 'Dashboard doanh nghiệp',
+          icon: Icons.business_center_outlined,
+          onTap: () => Navigator.of(context).pushNamed(AppRoutes.ownerDashboard),
+        ),
+        _QuickAction(
+          label: 'Kho máy của tôi',
+          icon: Icons.agriculture_outlined,
+          onTap: () => Navigator.of(context).pushNamed(AppRoutes.ownerMachines),
+        ),
+        _QuickAction(
+          label: 'Đơn thuê máy',
+          icon: Icons.list_alt_outlined,
+          onTap: () => Navigator.of(context).pushNamed(AppRoutes.ownerBookings),
+        ),
+        _QuickAction(
+          label: 'Lịch máy',
+          icon: Icons.calendar_month_outlined,
+          onTap: () => Navigator.of(context).pushNamed(AppRoutes.ownerCalendar),
+        ),
+        _QuickAction(
+          label: 'Hồ sơ doanh nghiệp',
+          icon: Icons.apartment_outlined,
+          onTap: () => Navigator.of(context).pushNamed(AppRoutes.enterpriseProfile),
+        ),
+        _QuickAction(
+          label: 'Thông tin cá nhân',
+          icon: Icons.badge_outlined,
+          onTap: () => Navigator.of(context).pushNamed(AppRoutes.profile),
+        ),
+      ];
+    }
+
+    return [
+      _QuickAction(
+        label: 'Thuê máy nông nghiệp',
+        icon: Icons.agriculture_outlined,
+        onTap: () => Navigator.of(context).pushNamed(AppRoutes.machineList),
+      ),
+      _QuickAction(
+        label: 'Quản lý địa chỉ',
+        icon: Icons.place_outlined,
+        onTap: () => Navigator.of(context).pushNamed(AppRoutes.addressList),
+      ),
+      _QuickAction(
+        label: 'Đổi mật khẩu',
+        icon: Icons.lock_reset_outlined,
+        onTap: () => Navigator.of(context).pushNamed(AppRoutes.changePassword),
+      ),
+      _QuickAction(
+        label: 'Thông tin cá nhân',
+        icon: Icons.badge_outlined,
+        onTap: () => Navigator.of(context).pushNamed(AppRoutes.profile),
+      ),
+    ];
+  }
+
   String _roleTitle(UserRole? role) {
     switch (role) {
       case UserRole.admin:
@@ -264,12 +346,14 @@ class _HeroCard extends StatelessWidget {
     required this.roleTitle,
     required this.roleHint,
     required this.roleColor,
+    required this.onStart,
   });
 
   final String displayName;
   final String roleTitle;
   final String roleHint;
   final Color roleColor;
+  final VoidCallback onStart;
 
   @override
   Widget build(BuildContext context) {
@@ -305,7 +389,7 @@ class _HeroCard extends StatelessWidget {
             SizedBox(
               height: 52,
               child: ElevatedButton.icon(
-                onPressed: () => Navigator.of(context).pushNamed(AppRoutes.addressList),
+                onPressed: onStart,
                 icon: const Icon(Icons.rocket_launch_outlined),
                 label: const Text('Bắt đầu nhanh'),
               ),
