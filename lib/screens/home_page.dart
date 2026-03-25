@@ -77,13 +77,6 @@ class _HomePageState extends State<HomePage> {
                 roleTitle: _roleTitle(user?.role),
                 roleHint: _roleHint(user?.role),
                 roleColor: _roleColor(user?.role),
-                onStart: () => Navigator.of(context).pushNamed(
-                  switch (user?.role) {
-                    UserRole.admin => AppRoutes.adminDashboard,
-                    UserRole.sme => AppRoutes.ownerMachines,
-                    UserRole.farmer || null => AppRoutes.machineList,
-                  },
-                ),
               ),
               const SizedBox(height: 24),
               
@@ -158,6 +151,7 @@ class _HomePageState extends State<HomePage> {
         _QuickAction(label: 'Quản trị hệ thống', icon: Icons.admin_panel_settings_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.adminDashboard)),
         _QuickAction(label: 'Người dùng', icon: Icons.groups_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.userList)),
         _QuickAction(label: 'Thống kê', icon: Icons.bar_chart_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.systemStats)),
+        _QuickAction(label: 'Xem sản phẩm', icon: Icons.storefront_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.marketplace)),
         _QuickAction(label: 'Cá nhân', icon: Icons.badge_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.profile)),
       ];
     }
@@ -166,6 +160,7 @@ class _HomePageState extends State<HomePage> {
       return [
         _QuickAction(label: 'Kho máy của tôi', icon: Icons.agriculture_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.ownerMachines)),
         _QuickAction(label: 'Lịch máy', icon: Icons.calendar_month_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.ownerCalendar)),
+        _QuickAction(label: 'Xem sản phẩm', icon: Icons.storefront_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.marketplace)),
         _QuickAction(label: 'Hồ sơ doanh nghiệp', icon: Icons.apartment_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.enterpriseProfile)),
         _QuickAction(label: 'Đổi mật khẩu', icon: Icons.lock_reset_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.changePassword)),
         _QuickAction(label: 'Thông tin cá nhân', icon: Icons.badge_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.profile)),
@@ -174,6 +169,8 @@ class _HomePageState extends State<HomePage> {
 
     return [
       _QuickAction(label: 'Thuê máy', icon: Icons.agriculture_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.machineList)),
+      _QuickAction(label: 'Xem sản phẩm', icon: Icons.storefront_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.marketplace)),
+      _QuickAction(label: 'Giỏ hàng', icon: Icons.shopping_cart_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.marketplaceCart)),
       _QuickAction(label: 'Địa chỉ', icon: Icons.place_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.addressList)),
       _QuickAction(label: 'Mật khẩu', icon: Icons.lock_reset_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.changePassword)),
       _QuickAction(label: 'Cá nhân', icon: Icons.badge_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.profile)),
@@ -200,10 +197,9 @@ class _HomePageState extends State<HomePage> {
 }
 
 class _HeroCard extends StatelessWidget {
-  const _HeroCard({required this.displayName, required this.roleTitle, required this.roleHint, required this.roleColor, required this.onStart});
+  const _HeroCard({required this.displayName, required this.roleTitle, required this.roleHint, required this.roleColor});
   final String displayName, roleTitle, roleHint;
   final Color roleColor;
-  final VoidCallback onStart;
 
   @override
   Widget build(BuildContext context) {
@@ -221,11 +217,6 @@ class _HeroCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(color: roleColor.withOpacity(0.12), borderRadius: BorderRadius.circular(20)),
               child: Text(roleTitle, style: TextStyle(color: roleColor, fontWeight: FontWeight.bold, fontSize: 12)),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              height: 48,
-              child: ElevatedButton.icon(onPressed: onStart, icon: const Icon(Icons.rocket_launch_outlined), label: const Text('Bắt đầu ngay')),
             ),
           ],
         ),
@@ -266,24 +257,47 @@ class _QuickAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return SizedBox(
       width: (MediaQuery.of(context).size.width - 44) / 2,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: const Color(0xFFE5E7EB)),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFFFFFFFF), Color(0xFFF4FBF7)],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFDCEDE3)),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x12000000),
+                blurRadius: 10,
+                offset: Offset(0, 4),
+              ),
+            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(icon, color: const Color(0xFF1F7A4A)),
-              const SizedBox(height: 12),
-              Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: primary.withOpacity(0.14),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: primary, size: 20),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                label,
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+              ),
             ],
           ),
         ),

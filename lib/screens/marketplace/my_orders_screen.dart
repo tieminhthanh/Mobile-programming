@@ -5,6 +5,7 @@ import '../../controllers/cart_controller.dart';
 import '../../models/order_model.dart';
 import '../../repositories/commerce_repository.dart';
 import '../../core/utils/formatter.dart';
+import 'package:guardian/routes/app_routes.dart';
 
 class MyOrdersScreen extends StatefulWidget {
   const MyOrdersScreen({super.key, required this.buyerId});
@@ -69,7 +70,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                     // Dùng InkWell để có hiệu ứng nhấn toàn Card
                     onTap: () => Navigator.pushNamed(
                       context,
-                      '/order-detail',
+                      AppRoutes.marketplaceOrderDetail,
                       arguments: o,
                     ),
                     borderRadius: BorderRadius.circular(12),

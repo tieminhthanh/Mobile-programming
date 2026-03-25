@@ -7,6 +7,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:guardian/routes/app_routes.dart';
 
 import '../../controllers/product_controller.dart';
 import '../../controllers/cart_controller.dart';
@@ -83,14 +84,16 @@ class _ShopHomeScreenState extends State<ShopHomeScreen> {
             IconButton(
               icon: const Icon(Icons.dashboard_customize_outlined),
               tooltip: 'Bảng điều khiển',
-              onPressed: () => Navigator.pushNamed(context, '/admin-dashboard'),
+              onPressed: () =>
+                  Navigator.pushNamed(context, AppRoutes.marketplaceAdminDashboard),
             ),
           if (cartCtrl.canBuy)
             Stack(
               children: [
                 IconButton(
                   icon: const Icon(Icons.shopping_cart_outlined),
-                  onPressed: () => Navigator.pushNamed(context, '/cart'),
+                  onPressed: () =>
+                      Navigator.pushNamed(context, AppRoutes.marketplaceCart),
                 ),
                 if (cartCtrl.itemCount > 0)
                   Positioned(
@@ -114,7 +117,11 @@ class _ShopHomeScreenState extends State<ShopHomeScreen> {
             IconButton(
               icon: const Icon(Icons.receipt_long_outlined),
               onPressed: () =>
-                  Navigator.pushNamed(context, '/my-orders', arguments: 1),
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.marketplaceMyOrders,
+                    arguments: 1,
+                  ),
             ),
         ],
       ),
@@ -124,7 +131,7 @@ class _ShopHomeScreenState extends State<ShopHomeScreen> {
               onPressed: () async {
                 final created = await Navigator.pushNamed(
                   context,
-                  '/product-form',
+                  AppRoutes.marketplaceProductForm,
                 );
                 if (created == true) productCtrl.loadProducts();
               },
@@ -286,7 +293,7 @@ class _ProductCard extends StatelessWidget {
     return GestureDetector(
       onTap: () => Navigator.pushNamed(
         context,
-        '/product-detail',
+        AppRoutes.marketplaceProductDetail,
         arguments: product.productId!,
       ),
       child: Card(

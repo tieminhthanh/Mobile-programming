@@ -15,6 +15,7 @@ import '../../controllers/product_controller.dart';
 import '../../controllers/cart_controller.dart';
 import '../../models/product_model.dart';
 import '../../core/utils/formatter.dart';
+import 'package:guardian/routes/app_routes.dart';
 import 'product_form_screen.dart';
 
 class ProductDetailScreen extends StatefulWidget {
@@ -73,7 +74,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               children: [
                 IconButton(
                   icon: const Icon(Icons.shopping_cart_outlined),
-                  onPressed: () => Navigator.pushNamed(context, '/cart'),
+                  onPressed: () =>
+                      Navigator.pushNamed(context, AppRoutes.marketplaceCart),
                 ),
                 if (cartCtrl.itemCount > 0)
                   Positioned(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
+import 'package:guardian/routes/app_routes.dart';
 import '../../core/utils/formatter.dart';
 import '../../controllers/product_controller.dart';
 import '../../repositories/commerce_repository.dart';
@@ -62,13 +63,19 @@ class AdminDashboardScreen extends StatelessWidget {
               context, 
               title: 'Quản lý Sản phẩm', 
               icon: Icons.edit_note, 
-              onTap: () => Navigator.pushNamed(context, '/my-products')
+              onTap: () => Navigator.pushNamed(
+                context,
+                AppRoutes.marketplaceMyProducts,
+              )
             ),
             _buildAdminMenu(
               context, 
               title: 'Danh sách Đơn hàng', 
               icon: Icons.list_alt, 
-              onTap: () => Navigator.pushNamed(context, '/all-orders')
+              onTap: () => Navigator.pushNamed(
+                context,
+                AppRoutes.marketplaceAllOrders,
+              )
             ),
           ],
         ),

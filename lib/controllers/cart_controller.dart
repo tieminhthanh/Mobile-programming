@@ -5,6 +5,8 @@
 // =============================================================
 
 import 'package:flutter/foundation.dart';
+import 'package:guardian/controllers/session_controller.dart';
+import 'package:guardian/models/user.dart';
 
 import '../models/order_model.dart';
 import '../models/user_model.dart';
@@ -15,12 +17,26 @@ enum CartStatus { idle, loading, ordering, success, error }
 class CartController extends ChangeNotifier {
   CartController({
     required CommerceRepository repository,
-    required UserModel currentUser,
-  }) : _repo = repository,
-       _user = currentUser;
+  }) : _repo = repository;
 
   final CommerceRepository _repo;
-  final UserModel _user;
+
+  UserModel get _activeUser {
+    final sessionUser = SessionController.instance.currentUser.value;
+    final roleType = switch (sessionUser?.role) {
+      UserRole.admin => 'ADMIN',
+      UserRole.sme => 'SME',
+      UserRole.farmer => 'FARMER',
+      null => 'GUEST',
+    };
+
+    return UserModel(
+      userId: sessionUser?.id ?? 0,
+      phoneNumber: sessionUser?.phoneNumber ?? '',
+      roleType: roleType,
+      displayName: sessionUser?.displayName ?? 'Guest',
+    );
+  }
 
   List<CartItemModel> _items = [];
   CartStatus _status = CartStatus.idle;
@@ -39,7 +55,7 @@ class CartController extends ChangeNotifier {
   double get total => _items.fold(0, (sum, i) => sum + i.subtotal);
 
   /// Chỉ FARMER mới được dùng giỏ hàng
-  bool get canBuy => _user.roleType == 'FARMER';
+  bool get canBuy => _activeUser.roleType == 'FARMER';
 
   // ── Load ─────────────────────────────────────────────────
 
@@ -48,7 +64,7 @@ class CartController extends ChangeNotifier {
 
     _setStatus(CartStatus.loading);
     try {
-      _items = await _repo.getCartItems(_user.userId!);
+      _items = await _repo.getCartItems(_activeUser.userId);
       _setStatus(CartStatus.idle);
     } catch (e) {
       _setError('Không thể tải giỏ hàng: $e');
@@ -67,7 +83,7 @@ class CartController extends ChangeNotifier {
     }
 
     try {
-      final cartId = await _repo.getOrCreateCart(_user.userId!);
+      final cartId = await _repo.getOrCreateCart(_activeUser.userId);
       await _repo.upsertCartItem(
         cartId: cartId,
         productId: productId,
@@ -121,7 +137,7 @@ class CartController extends ChangeNotifier {
     try {
       // 1. Tạo đơn hàng CHỈ VỚI những món được chọn
       _lastOrderId = await _repo.createOrder(
-        buyerId: _user.userId!,
+        buyerId: _activeUser.userId,
         items: itemsToBuy,
       );
 

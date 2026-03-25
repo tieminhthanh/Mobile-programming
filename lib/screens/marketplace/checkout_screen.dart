@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:guardian/routes/app_routes.dart';
 import '../../controllers/cart_controller.dart';
 import '../../models/order_model.dart';
 import '../../core/utils/formatter.dart';
@@ -82,7 +83,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       if (ok && mounted) {
         Navigator.pushReplacementNamed(
           context,
-          '/order-success',
+          AppRoutes.marketplaceOrderSuccess,
           arguments: ctrl.lastOrderId!,
         );
       }

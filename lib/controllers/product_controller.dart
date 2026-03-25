@@ -9,6 +9,8 @@
 // =============================================================
 
 import 'package:flutter/foundation.dart';
+import 'package:guardian/controllers/session_controller.dart';
+import 'package:guardian/models/user.dart';
 
 import '../models/product_model.dart';
 import '../models/user_model.dart';
@@ -19,12 +21,26 @@ enum ProductStatus { idle, loading, saving, deleting, error }
 class ProductController extends ChangeNotifier {
   ProductController({
     required CommerceRepository repository,
-    required UserModel currentUser,
-  }) : _repo = repository,
-       _user = currentUser;
+  }) : _repo = repository;
 
   final CommerceRepository _repo;
-  final UserModel _user;
+
+  UserModel get _activeUser {
+    final sessionUser = SessionController.instance.currentUser.value;
+    final roleType = switch (sessionUser?.role) {
+      UserRole.admin => 'ADMIN',
+      UserRole.sme => 'SME',
+      UserRole.farmer => 'FARMER',
+      null => 'GUEST',
+    };
+
+    return UserModel(
+      userId: sessionUser?.id ?? 0,
+      phoneNumber: sessionUser?.phoneNumber ?? '',
+      roleType: roleType,
+      displayName: sessionUser?.displayName ?? 'Guest',
+    );
+  }
 
   List<ProductModel> _products = [];
   List<String> _categories = [];
@@ -42,23 +58,26 @@ class ProductController extends ChangeNotifier {
   bool get isLoading => _status == ProductStatus.loading;
 
   // Phân quyền
-  bool get canSell => _user.roleType == 'SME' || _user.roleType == 'FARMER';
-  bool get isAdmin => _user.roleType == 'ADMIN';
-  bool get isSME => _user.roleType == 'SME';
-  bool get isFarmer => _user.roleType == 'FARMER';
+  bool get canSell =>
+      _activeUser.roleType == 'SME' || _activeUser.roleType == 'FARMER';
+  bool get isAdmin => _activeUser.roleType == 'ADMIN';
+  bool get isSME => _activeUser.roleType == 'SME';
+  bool get isFarmer => _activeUser.roleType == 'FARMER';
 
   bool canEdit(ProductModel product) {
     if (isAdmin) return true;
-    if (!isSME)
+    if (!isSME) {
       return false; // CHẶN: Nếu không phải Admin và không phải SME thì cấm sửa
-    return product.sellerId == _user.userId;
+    }
+    return product.sellerId == _activeUser.userId;
   }
 
   bool canDelete(ProductModel product) {
     if (isAdmin) return true;
-    if (!isSME)
+    if (!isSME) {
       return false; // CHẶN: Nếu không phải Admin và không phải SME thì cấm xoá
-    return product.sellerId == _user.userId;
+    }
+    return product.sellerId == _activeUser.userId;
   }
 
   // ── Load ─────────────────────────────────────────────────
@@ -79,7 +98,7 @@ class ProductController extends ChangeNotifier {
     if (!canSell) return;
     _setStatus(ProductStatus.loading);
     try {
-      _products = await _repo.getProductsBySeller(_user.userId!);
+      _products = await _repo.getProductsBySeller(_activeUser.userId);
       _setStatus(ProductStatus.idle);
     } catch (e) {
       _setError('Không thể tải sản phẩm: $e');
@@ -124,7 +143,7 @@ class ProductController extends ChangeNotifier {
     try {
       // Gắn đúng sellerId từ user hiện tại
       final toSave = ProductModel(
-        sellerId: _user.userId!,
+        sellerId: _activeUser.userId,
         title: product.title,
         description: product.description,
         category: product.category,
@@ -174,7 +193,7 @@ class ProductController extends ChangeNotifier {
     try {
       await _repo.deleteProduct(
         productId: product.productId!,
-        sellerId: isAdmin ? null : _user.userId,
+        sellerId: isAdmin ? null : _activeUser.userId,
       );
       _products.removeWhere((p) => p.productId == product.productId);
       _setStatus(ProductStatus.idle);

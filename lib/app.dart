@@ -23,7 +23,6 @@ import 'screens/home_page.dart';
 import 'screens/user/profile_page.dart';
 import 'screens/user/user_list_page.dart';
 import 'screens/user/user_lock_page.dart';
-
 // Import Models
 import 'package:guardian/models/order_model.dart';
 
@@ -38,7 +37,8 @@ import 'package:guardian/screens/marketplace/my_orders_screen.dart';
 import 'package:guardian/screens/marketplace/my_products_screen.dart';
 
 // Import Admin/SME Screens
-import 'package:guardian/screens/marketplace/admin_dashboard_screen.dart' as marketplace;
+import 'package:guardian/screens/marketplace/admin_dashboard_screen.dart'
+  as marketplace;
 import 'package:guardian/screens/marketplace/order_detail_screen.dart';
 
 class GuardianApp extends StatelessWidget {
@@ -94,16 +94,11 @@ class GuardianApp extends StatelessWidget {
           bodyColor: onSurface,
           displayColor: onSurface,
         ),
-        appBarTheme: AppBarTheme(
-          backgroundColor: background,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF0F5C45),
+          foregroundColor: Colors.white,
           elevation: 0,
-          centerTitle: false,
-          iconTheme: const IconThemeData(color: onSurface),
-          titleTextStyle: GoogleFonts.beVietnamPro(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: onSurface,
-          ),
+          centerTitle: true,
         ),
         cardTheme: const CardThemeData(
           color: surface,
@@ -195,39 +190,20 @@ class GuardianApp extends StatelessWidget {
           ),
         ),
         useMaterial3: true,
-        // AppBar đồng bộ màu thương hiệu
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF0F5C45),
-          foregroundColor: Colors.white,
-          elevation: 0,
-          centerTitle: true,
-        ),
       ),
       initialRoute: AppRoutes.login,
       routes: {
-        // ===== AUTH ROUTES =====
+        AppRoutes.home: (context) => guarded(
+          const HomePage(),
+          roles: const [UserRole.farmer, UserRole.sme, UserRole.admin],
+        ),
         AppRoutes.login: (context) => const LoginPage(),
         AppRoutes.register: (context) => const RegisterPage(),
         AppRoutes.logout: (context) => guarded(const LogoutPage()),
         AppRoutes.changePassword: (context) => guarded(
           const ChangePasswordPage(),
         ),
-        
-        // ===== HOME & PROFILE =====
-        AppRoutes.home: (context) => guarded(
-          const HomePage(),
-          roles: const [UserRole.farmer, UserRole.sme, UserRole.admin],
-        ),
         AppRoutes.profile: (context) => guarded(const ProfilePage()),
-        
-        // ===== ADDRESS =====
-        AppRoutes.addressList: (context) => guarded(const AddressListPage()),
-        AppRoutes.addressEdit: (context) => guarded(
-          const AddressEditPage(),
-          deniedRoute: AppRoutes.addressList,
-        ),
-        
-        // ===== ADMIN ONLY =====
         AppRoutes.userList: (context) => guarded(
           const UserListPage(),
           roles: const [UserRole.admin],
@@ -236,15 +212,18 @@ class GuardianApp extends StatelessWidget {
           const UserLockPage(),
           roles: const [UserRole.admin],
         ),
-        AppRoutes.adminDashboard: (context) => guarded(
-          const AdminDashboardPage(),
-          roles: const [UserRole.admin],
+        AppRoutes.addressList: (context) => guarded(const AddressListPage()),
+        AppRoutes.addressEdit: (context) => guarded(
+          const AddressEditPage(),
+          deniedRoute: AppRoutes.addressList,
         ),
-        
-        // ===== OWNER ONLY (SME & ADMIN) =====
         AppRoutes.enterpriseProfile: (context) => guarded(
           const EnterpriseProfilePage(),
           roles: ownerRoles,
+        ),
+        AppRoutes.adminDashboard: (context) => guarded(
+          const AdminDashboardPage(),
+          roles: const [UserRole.admin],
         ),
         AppRoutes.systemStats: (context) => guarded(
           const SystemStatsPage(),
@@ -254,8 +233,6 @@ class GuardianApp extends StatelessWidget {
           const AdminSupportPage(),
           roles: ownerRoles,
         ),
-        
-        // ===== MACHINE RENTAL =====
         AppRoutes.machineList: (context) => guarded(
           const MachineListScreen(),
           roles: const [UserRole.farmer, UserRole.sme, UserRole.admin],
@@ -276,40 +253,40 @@ class GuardianApp extends StatelessWidget {
           const OwnerMachineListScreen(),
           roles: ownerRoles,
         ),
-        
-        // ===== MARKETPLACE =====
-        '/': (context) => const ShopHomeScreen(),
-        '/product-form': (context) => const ProductFormScreen(),
-        '/my-products': (context) => const MyProductsScreen(),
-        '/cart': (context) => const CartScreen(),
-        '/marketplace-admin-dashboard': (context) => const marketplace.AdminDashboardScreen(),
-        '/all-orders': (context) => const MyOrdersScreen(buyerId: 0),
-        '/my-orders': (context) {
+
+        // Marketplace routes
+        AppRoutes.marketplace: (context) => const ShopHomeScreen(),
+        AppRoutes.marketplaceProductForm: (context) => const ProductFormScreen(),
+        AppRoutes.marketplaceMyProducts: (context) => const MyProductsScreen(),
+        AppRoutes.marketplaceCart: (context) => const CartScreen(),
+        AppRoutes.marketplaceAdminDashboard:
+            (context) => const marketplace.AdminDashboardScreen(),
+        AppRoutes.marketplaceAllOrders: (context) => const MyOrdersScreen(buyerId: 0),
+
+        AppRoutes.marketplaceMyOrders: (context) {
           final buyerId = ModalRoute.of(context)!.settings.arguments as int;
           return MyOrdersScreen(buyerId: buyerId);
         },
-        '/product-detail': (context) {
+
+        AppRoutes.marketplaceProductDetail: (context) {
           final productId = ModalRoute.of(context)!.settings.arguments as int;
           return ProductDetailScreen(productId: productId);
         },
-        '/order-success': (context) {
+
+        AppRoutes.marketplaceOrderSuccess: (context) {
           final orderId = ModalRoute.of(context)!.settings.arguments as int;
           return OrderSuccessScreen(orderId: orderId);
         },
       },
-
-      // ===== DYNAMIC ROUTES (OBJECT PARAMETERS) =====
       onGenerateRoute: (settings) {
-        // Marketplace: Order Detail
-        if (settings.name == '/order-detail') {
+        if (settings.name == AppRoutes.marketplaceOrderDetail) {
           final order = settings.arguments as OrderModel;
           return MaterialPageRoute(
             builder: (context) => OrderDetailScreen(order: order),
           );
         }
 
-        // Marketplace: Checkout
-        if (settings.name == '/checkout') {
+        if (settings.name == AppRoutes.marketplaceCheckout) {
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
             builder: (context) => CheckoutScreen(
@@ -318,7 +295,7 @@ class GuardianApp extends StatelessWidget {
             ),
           );
         }
-        
+
         return null;
       },
     );
