@@ -61,10 +61,6 @@ class _UserListPageState extends State<UserListPage> {
     return _users.where((u) => u.isActive == isActive).length;
   }
 
-  int _countByRole(UserRole role) {
-    return _users.where((u) => u.role == role).length;
-  }
-
   Color _roleColor(UserRole role) {
     switch (role) {
       case UserRole.admin:
@@ -110,13 +106,6 @@ class _UserListPageState extends State<UserListPage> {
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  _SummaryPanel(
-                    totalUsers: _users.length,
-                    activeUsers: _countByStatus(true),
-                    lockedUsers: _countByStatus(false),
-                    adminUsers: _countByRole(UserRole.admin),
-                  ),
-                  const SizedBox(height: 12),
                   Card(
                     child: Padding(
                       padding: const EdgeInsets.all(14),
@@ -139,60 +128,60 @@ class _UserListPageState extends State<UserListPage> {
                             ),
                           ),
                           const SizedBox(height: 10),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
+                          Row(
                             children: [
-                              ChoiceChip(
-                                label: const Text('Tất cả trạng thái'),
-                                selected: _statusFilter == 'all',
-                                onSelected: (_) =>
-                                    setState(() => _statusFilter = 'all'),
-                              ),
-                              ChoiceChip(
-                                label: const Text('Đang hoạt động'),
-                                selected: _statusFilter == 'active',
-                                onSelected: (_) =>
-                                    setState(() => _statusFilter = 'active'),
-                              ),
-                              ChoiceChip(
-                                label: const Text('Đang bị khóa'),
-                                selected: _statusFilter == 'locked',
-                                onSelected: (_) =>
-                                    setState(() => _statusFilter = 'locked'),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: [
-                              FilterChip(
-                                label: const Text('Mọi vai trò'),
-                                selected: _roleFilter == null,
-                                onSelected: (_) =>
-                                    setState(() => _roleFilter = null),
-                              ),
-                              FilterChip(
-                                label: const Text('Admin'),
-                                selected: _roleFilter == UserRole.admin,
-                                onSelected: (_) => setState(
-                                  () => _roleFilter = UserRole.admin,
+                              Expanded(
+                                child: Wrap(
+                                  spacing: 8,
+                                  children: [
+                                    ChoiceChip(
+                                      label: const Text('Tất cả'),
+                                      selected: _statusFilter == 'all',
+                                      onSelected: (_) =>
+                                          setState(() => _statusFilter = 'all'),
+                                    ),
+                                    ChoiceChip(
+                                      label: const Text('Hoạt động'),
+                                      selected: _statusFilter == 'active',
+                                      onSelected: (_) => setState(
+                                        () => _statusFilter = 'active',
+                                      ),
+                                    ),
+                                    ChoiceChip(
+                                      label: const Text('Bị khóa'),
+                                      selected: _statusFilter == 'locked',
+                                      onSelected: (_) => setState(
+                                        () => _statusFilter = 'locked',
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              FilterChip(
-                                label: const Text('SME'),
-                                selected: _roleFilter == UserRole.sme,
-                                onSelected: (_) =>
-                                    setState(() => _roleFilter = UserRole.sme),
-                              ),
-                              FilterChip(
-                                label: const Text('Farmer'),
-                                selected: _roleFilter == UserRole.farmer,
-                                onSelected: (_) => setState(
-                                  () => _roleFilter = UserRole.farmer,
-                                ),
+                              const SizedBox(width: 8),
+                              DropdownButton<UserRole?>(
+                                value: _roleFilter,
+                                underline: const SizedBox.shrink(),
+                                hint: const Text('Vai trò'),
+                                items: const [
+                                  DropdownMenuItem<UserRole?>(
+                                    value: null,
+                                    child: Text('Tất cả vai trò'),
+                                  ),
+                                  DropdownMenuItem<UserRole?>(
+                                    value: UserRole.admin,
+                                    child: Text('Admin'),
+                                  ),
+                                  DropdownMenuItem<UserRole?>(
+                                    value: UserRole.sme,
+                                    child: Text('SME'),
+                                  ),
+                                  DropdownMenuItem<UserRole?>(
+                                    value: UserRole.farmer,
+                                    child: Text('Farmer'),
+                                  ),
+                                ],
+                                onChanged: (value) =>
+                                    setState(() => _roleFilter = value),
                               ),
                             ],
                           ),
@@ -202,7 +191,7 @@ class _UserListPageState extends State<UserListPage> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Kết quả: ${filtered.length} người dùng',
+                    'Người dùng: ${filtered.length}/${_users.length} • Hoạt động: ${_countByStatus(true)}',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -228,168 +217,6 @@ class _UserListPageState extends State<UserListPage> {
                 ],
               ),
             ),
-    );
-  }
-}
-
-class _SummaryPanel extends StatelessWidget {
-  const _SummaryPanel({
-    required this.totalUsers,
-    required this.activeUsers,
-    required this.lockedUsers,
-    required this.adminUsers,
-  });
-
-  final int totalUsers;
-  final int activeUsers;
-  final int lockedUsers;
-  final int adminUsers;
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final compact = constraints.maxWidth < 560;
-        final cardWidth = compact
-            ? constraints.maxWidth
-            : (constraints.maxWidth - 12) / 2;
-        return Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children:
-              [
-                    SizedBox(
-                      width: cardWidth,
-                      child: const _MetricCard(
-                        label: 'Tổng người dùng',
-                        icon: Icons.group_outlined,
-                        valueKey: 'total',
-                      ),
-                    ),
-                    SizedBox(
-                      width: cardWidth,
-                      child: const _MetricCard(
-                        label: 'Đang hoạt động',
-                        icon: Icons.verified_user_outlined,
-                        valueKey: 'active',
-                      ),
-                    ),
-                    SizedBox(
-                      width: cardWidth,
-                      child: const _MetricCard(
-                        label: 'Tài khoản bị khóa',
-                        icon: Icons.lock_outline,
-                        valueKey: 'locked',
-                      ),
-                    ),
-                    SizedBox(
-                      width: cardWidth,
-                      child: const _MetricCard(
-                        label: 'Tài khoản Admin',
-                        icon: Icons.admin_panel_settings_outlined,
-                        valueKey: 'admin',
-                      ),
-                    ),
-                  ]
-                  .map(
-                    (widget) => _MetricCardValueBinder(
-                      totalUsers: totalUsers,
-                      activeUsers: activeUsers,
-                      lockedUsers: lockedUsers,
-                      adminUsers: adminUsers,
-                      child: widget,
-                    ),
-                  )
-                  .toList(),
-        );
-      },
-    );
-  }
-}
-
-class _MetricCardValueBinder extends InheritedWidget {
-  const _MetricCardValueBinder({
-    required super.child,
-    required this.totalUsers,
-    required this.activeUsers,
-    required this.lockedUsers,
-    required this.adminUsers,
-  });
-
-  final int totalUsers;
-  final int activeUsers;
-  final int lockedUsers;
-  final int adminUsers;
-
-  static _MetricCardValueBinder of(BuildContext context) {
-    final result = context
-        .dependOnInheritedWidgetOfExactType<_MetricCardValueBinder>();
-    assert(result != null, 'Missing _MetricCardValueBinder in widget tree.');
-    return result!;
-  }
-
-  @override
-  bool updateShouldNotify(_MetricCardValueBinder oldWidget) {
-    return totalUsers != oldWidget.totalUsers ||
-        activeUsers != oldWidget.activeUsers ||
-        lockedUsers != oldWidget.lockedUsers ||
-        adminUsers != oldWidget.adminUsers;
-  }
-}
-
-class _MetricCard extends StatelessWidget {
-  const _MetricCard({
-    required this.label,
-    required this.icon,
-    required this.valueKey,
-  });
-
-  final String label;
-  final IconData icon;
-  final String valueKey;
-
-  @override
-  Widget build(BuildContext context) {
-    final binder = _MetricCardValueBinder.of(context);
-    final value = switch (valueKey) {
-      'total' => binder.totalUsers,
-      'active' => binder.activeUsers,
-      'locked' => binder.lockedUsers,
-      _ => binder.adminUsers,
-    };
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: const Color(0xFFE8F3ED),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon, color: const Color(0xFF1E6B47), size: 20),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(label, style: Theme.of(context).textTheme.bodySmall),
-                  const SizedBox(height: 4),
-                  Text(
-                    value.toString(),
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -86,7 +86,8 @@ class SessionController {
     final normalized = username.trim().toLowerCase();
     final rows = await _db.query(
       usersTable.name,
-      where: '${usersTable.column('phoneNumber')} = ? OR ${usersTable.column('email')} = ?',
+      where:
+          '${usersTable.column('phoneNumber')} = ? OR ${usersTable.column('email')} = ?',
       whereArgs: [normalized, normalized],
       limit: 1,
     );
@@ -129,7 +130,9 @@ class SessionController {
     String? displayName,
   }) async {
     final phone = phoneNumber.trim();
-    final emailValue = (email?.trim().isNotEmpty == true) ? email!.trim() : null;
+    final emailValue = (email?.trim().isNotEmpty == true)
+        ? email!.trim()
+        : null;
     if (phone.isEmpty || password.trim().isEmpty) {
       return const RegisterResult(
         status: RegisterStatus.invalid,
@@ -266,14 +269,18 @@ class SessionController {
     return rows.map(_mapUser).toList();
   }
 
-  Future<void> toggleUserLock(int userId) async {
+  Future<bool> toggleUserLock(int userId) async {
     final row = await _db.queryById(
       usersTable.name,
       usersTable.column('userId'),
       userId,
     );
     if (row == null) {
-      return;
+      return false;
+    }
+    final roleType = (row[usersTable.column('roleType')] as String?) ?? '';
+    if (roleType == 'ADMIN') {
+      return false;
     }
     final isActive = (row[usersTable.column('isActive')] as int?) == 1;
     await _db.update(
@@ -286,6 +293,7 @@ class SessionController {
     if (current != null && current.id == userId && isActive) {
       await _setCurrentUser(null);
     }
+    return true;
   }
 
   // ---------------------------------------------------------------------------
@@ -336,11 +344,23 @@ class SessionController {
   // ---------------------------------------------------------------------------
   // ENTERPRISE PROFILE
   // ---------------------------------------------------------------------------
-  Future<EnterpriseProfile> loadEnterpriseProfile() async {
-    final rows = await _db.query(smeProfilesTable.name, limit: 1);
+  Future<List<EnterpriseProfile>> fetchEnterpriseProfiles() async {
+    final rows = await _db.query(
+      smeProfilesTable.name,
+      orderBy: '${smeProfilesTable.column('companyName')} COLLATE NOCASE ASC',
+    );
+    return rows.map(_mapEnterpriseProfile).toList();
+  }
+
+  Future<EnterpriseProfile> loadEnterpriseProfile({int? userId}) async {
+    final rows = await _db.query(
+      smeProfilesTable.name,
+      where: userId == null ? null : '${smeProfilesTable.column('userId')} = ?',
+      whereArgs: userId == null ? null : [userId],
+      limit: 1,
+    );
     if (rows.isEmpty) {
-      final user = currentUser.value;
-      final fallbackUserId = user?.id ?? 0;
+      final fallbackUserId = userId ?? currentUser.value?.id ?? 0;
       return EnterpriseProfile(userId: fallbackUserId);
     }
     return _mapEnterpriseProfile(rows.first);
@@ -409,7 +429,14 @@ class SessionController {
       where:
           "(${usersTable.column('email')} IN (?, ?) OR ${usersTable.column('phoneNumber')} IN (?, ?)) "
           "AND ${usersTable.column('roleType')} IN (?, ?)",
-      whereArgs: ['admin', 'user', '0900000000', '0900000001', 'ADMIN', 'FARMER'],
+      whereArgs: [
+        'admin',
+        'user',
+        '0900000000',
+        '0900000001',
+        'ADMIN',
+        'FARMER',
+      ],
     );
   }
 
@@ -489,9 +516,11 @@ class SessionController {
   EnterpriseProfile _mapEnterpriseProfile(Map<String, dynamic> row) {
     return EnterpriseProfile(
       userId: row[smeProfilesTable.column('userId')] as int,
-      companyName: (row[smeProfilesTable.column('companyName')] as String?) ?? '',
+      companyName:
+          (row[smeProfilesTable.column('companyName')] as String?) ?? '',
       taxCode: (row[smeProfilesTable.column('taxCode')] as String?) ?? '',
-      contactName: (row[smeProfilesTable.column('contactName')] as String?) ?? '',
+      contactName:
+          (row[smeProfilesTable.column('contactName')] as String?) ?? '',
       contactPhone:
           (row[smeProfilesTable.column('contactPhone')] as String?) ?? '',
       addressSummary:
@@ -526,7 +555,3 @@ class SessionController {
     }
   }
 }
-
-
-
-

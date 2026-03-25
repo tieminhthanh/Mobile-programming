@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:guardian/controllers/session_controller.dart';
 import 'package:guardian/core/widgets/app_back_button.dart';
 import 'package:guardian/routes/app_routes.dart';
@@ -77,14 +77,14 @@ class _RegisterPageState extends State<RegisterPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text('Tạo tài khoản mới', style: textTheme.titleMedium),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 4),
                   Text(
-                    'Thông tin rõ ràng giúp hệ thống hỗ trợ nhanh và truy xuất minh bạch.',
-                    style: textTheme.bodyMedium?.copyWith(color: Colors.grey[700]),
+                    'Vai trò mặc định: Nông dân',
+                    style: textTheme.bodySmall?.copyWith(
+                      color: Colors.grey[700],
+                    ),
                   ),
-                  const SizedBox(height: 10),
-                  const Chip(label: Text('Vai trò mặc định: Nông dân')),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   Form(
                     key: _formKey,
                     child: Column(
@@ -98,7 +98,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             labelText: 'Họ và tên',
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 10),
                         TextFormField(
                           controller: _phoneController,
                           textInputAction: TextInputAction.next,
@@ -114,7 +114,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 10),
                         TextFormField(
                           controller: _emailController,
                           textInputAction: TextInputAction.next,
@@ -123,7 +123,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             labelText: 'Email (tùy chọn)',
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 10),
                         TextFormField(
                           controller: _passwordController,
                           obscureText: true,
@@ -139,7 +139,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 10),
                         TextFormField(
                           controller: _confirmController,
                           obscureText: true,
@@ -154,7 +154,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 16),
                         ElevatedButton.icon(
                           onPressed: _isLoading ? null : _handleRegister,
                           icon: const Icon(Icons.app_registration),
@@ -165,8 +165,9 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   const SizedBox(height: 8),
                   OutlinedButton(
-                    onPressed: () => Navigator.of(context)
-                        .pushReplacementNamed(AppRoutes.login),
+                    onPressed: () => Navigator.of(
+                      context,
+                    ).pushReplacementNamed(AppRoutes.login),
                     child: const Text('Đã có tài khoản? Đăng nhập'),
                   ),
                 ],

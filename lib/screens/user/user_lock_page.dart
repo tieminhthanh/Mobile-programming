@@ -43,6 +43,15 @@ class _UserLockPageState extends State<UserLockPage> {
   }
 
   Future<void> _toggleLock(AppUser user) async {
+    if (user.role == UserRole.admin) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Không thể khóa hoặc mở khóa tài khoản quản trị viên.'),
+        ),
+      );
+      return;
+    }
+
     final actionText = user.isActive ? 'Khóa tài khoản' : 'Mở khóa tài khoản';
     final confirmed = await showDialog<bool>(
       context: context,
@@ -50,8 +59,8 @@ class _UserLockPageState extends State<UserLockPage> {
         title: Text(actionText),
         content: Text(
           user.isActive
-              ? 'Bạn chắc chắn muốn khóa tài khoản ${user.primaryLogin}? Người dùng sẽ không thể đăng nhập cho đến khi được mở khóa.'
-              : 'Bạn chắc chắn muốn mở khóa tài khoản ${user.primaryLogin}? Người dùng sẽ có thể đăng nhập lại.',
+              ? 'Xác nhận khóa tài khoản này?'
+              : 'Xác nhận mở khóa tài khoản này?',
         ),
         actions: [
           TextButton(
@@ -76,12 +85,21 @@ class _UserLockPageState extends State<UserLockPage> {
     }
 
     setState(() => _isUpdating = true);
-    await SessionController.instance.toggleUserLock(user.id);
+    final changed = await SessionController.instance.toggleUserLock(user.id);
     await _load();
     if (!mounted) {
       return;
     }
     setState(() => _isUpdating = false);
+
+    if (!changed) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Không thể thay đổi trạng thái của tài khoản này.'),
+        ),
+      );
+      return;
+    }
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -112,6 +130,7 @@ class _UserLockPageState extends State<UserLockPage> {
   Widget build(BuildContext context) {
     final filtered = _filteredUsers;
     final currentUserId = SessionController.instance.currentUser.value?.id;
+    final adminUsers = _users.where((u) => u.role == UserRole.admin).length;
 
     return Scaffold(
       appBar: AppBar(
@@ -164,9 +183,18 @@ class _UserLockPageState extends State<UserLockPage> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Chỉ thực hiện khóa khi có căn cứ rõ ràng. Mọi thay đổi sẽ tác động trực tiếp đến khả năng đăng nhập của người dùng.',
+                            'Xác nhận trước khi khóa/mở để tránh thao tác nhầm.',
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(color: Colors.grey[700]),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Tài khoản ADMIN không cho phép khóa/mở.',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: const Color(0xFF7A5A1E),
+                                  fontWeight: FontWeight.w600,
+                                ),
                           ),
                           const SizedBox(height: 10),
                           TextField(
@@ -212,14 +240,8 @@ class _UserLockPageState extends State<UserLockPage> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  _OperationSummary(
-                    totalUsers: _users.length,
-                    activeUsers: _users.where((u) => u.isActive).length,
-                    lockedUsers: _users.where((u) => !u.isActive).length,
-                  ),
-                  const SizedBox(height: 12),
                   Text(
-                    'Danh sách xử lý: ${filtered.length} tài khoản',
+                    'Danh sách xử lý: ${filtered.length}/${_users.length} • Admin: $adminUsers',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -246,88 +268,6 @@ class _UserLockPageState extends State<UserLockPage> {
   }
 }
 
-class _OperationSummary extends StatelessWidget {
-  const _OperationSummary({
-    required this.totalUsers,
-    required this.activeUsers,
-    required this.lockedUsers,
-  });
-
-  final int totalUsers;
-  final int activeUsers;
-  final int lockedUsers;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _SummaryMiniCard(
-            title: 'Tổng',
-            value: totalUsers.toString(),
-            icon: Icons.group_outlined,
-            color: const Color(0xFF1E6B47),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _SummaryMiniCard(
-            title: 'Hoạt động',
-            value: activeUsers.toString(),
-            icon: Icons.check_circle_outline,
-            color: const Color(0xFF1E6B47),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _SummaryMiniCard(
-            title: 'Bị khóa',
-            value: lockedUsers.toString(),
-            icon: Icons.gpp_bad_outlined,
-            color: const Color(0xFFD32F2F),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _SummaryMiniCard extends StatelessWidget {
-  const _SummaryMiniCard({
-    required this.title,
-    required this.value,
-    required this.icon,
-    required this.color,
-  });
-
-  final String title;
-  final String value;
-  final IconData icon;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 18),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: Theme.of(
-                context,
-              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-            ),
-            Text(title, style: Theme.of(context).textTheme.labelSmall),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _LockActionCard extends StatelessWidget {
   const _LockActionCard({
     required this.user,
@@ -349,6 +289,10 @@ class _LockActionCard extends StatelessWidget {
         : const Color(0xFF1E6B47);
     final statusText = locked ? 'Đang bị khóa' : 'Đang hoạt động';
     final isCurrentUser = currentUserId == user.id;
+    final isAdmin = user.role == UserRole.admin;
+    final buttonLabel = isAdmin
+        ? 'Tài khoản quản trị viên'
+        : (locked ? 'Mở khóa tài khoản' : 'Khóa tài khoản');
 
     return Card(
       child: Padding(
@@ -445,15 +389,21 @@ class _LockActionCard extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: isUpdating ? null : onToggle,
+                onPressed: (isUpdating || isAdmin) ? null : onToggle,
                 icon: Icon(
-                  locked ? Icons.lock_open_outlined : Icons.lock_outline,
+                  isAdmin
+                      ? Icons.verified_user_outlined
+                      : (locked
+                            ? Icons.lock_open_outlined
+                            : Icons.lock_outline),
                 ),
-                label: Text(locked ? 'Mở khóa tài khoản' : 'Khóa tài khoản'),
+                label: Text(buttonLabel),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: locked
-                      ? const Color(0xFF1E6B47)
-                      : const Color(0xFFD32F2F),
+                  backgroundColor: isAdmin
+                      ? const Color(0xFF6B7280)
+                      : (locked
+                            ? const Color(0xFF1E6B47)
+                            : const Color(0xFFD32F2F)),
                 ),
               ),
             ),

@@ -13,37 +13,27 @@ class AdminDashboardPage extends StatelessWidget {
       _AdminActionItem(
         icon: Icons.group_outlined,
         label: 'Danh sách người dùng',
-        description: 'Theo dõi vai trò, hoạt động và thông tin tài khoản.',
-        priority: 'Cao',
         onTap: () => Navigator.of(context).pushNamed(AppRoutes.userList),
       ),
       _AdminActionItem(
         icon: Icons.lock_outlined,
         label: 'Khóa / mở tài khoản',
-        description: 'Xử lý nhanh các tài khoản cần kiểm soát truy cập.',
-        priority: 'Khẩn',
         onTap: () => Navigator.of(context).pushNamed(AppRoutes.userLock),
       ),
       _AdminActionItem(
         icon: Icons.apartment_outlined,
-        label: 'Hồ sơ doanh nghiệp',
-        description: 'Cập nhật dữ liệu doanh nghiệp và trạng thái xác thực.',
-        priority: 'Trung bình',
+        label: 'Quản lý doanh nghiệp',
         onTap: () =>
             Navigator.of(context).pushNamed(AppRoutes.enterpriseProfile),
       ),
       _AdminActionItem(
         icon: Icons.query_stats_outlined,
         label: 'Thống kê hệ thống',
-        description: 'Xem xu hướng dữ liệu, báo cáo tổng hợp theo thời gian.',
-        priority: 'Cao',
         onTap: () => Navigator.of(context).pushNamed(AppRoutes.systemStats),
       ),
       _AdminActionItem(
         icon: Icons.support_agent_outlined,
         label: 'Hỗ trợ quản trị',
-        description: 'Truy cập kênh hỗ trợ nội bộ và quy trình xử lý sự cố.',
-        priority: 'Trung bình',
         onTap: () => Navigator.of(context).pushNamed(AppRoutes.adminSupport),
       ),
     ];
@@ -72,11 +62,7 @@ class AdminDashboardPage extends StatelessWidget {
             children: [
               _AdminHeroCard(user: user),
               const SizedBox(height: 20),
-              const _SectionHeader(
-                title: 'Tổng quan hệ thống',
-                subtitle:
-                    'Các chỉ số quan trọng được cập nhật theo dữ liệu thực.',
-              ),
+              const _SectionHeader(title: 'Tổng quan hệ thống'),
               const SizedBox(height: 12),
               FutureBuilder<List<SystemStat>>(
                 future: SessionController.instance.systemStats(),
@@ -127,11 +113,7 @@ class AdminDashboardPage extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 20),
-              const _SectionHeader(
-                title: 'Tác vụ quản trị',
-                subtitle:
-                    'Ưu tiên xử lý tác vụ khẩn trước để ổn định vận hành.',
-              ),
+              const _SectionHeader(title: 'Tác vụ quản trị'),
               const SizedBox(height: 12),
               LayoutBuilder(
                 builder: (context, constraints) {
@@ -152,13 +134,6 @@ class AdminDashboardPage extends StatelessWidget {
                   );
                 },
               ),
-              const SizedBox(height: 20),
-              const _SectionHeader(
-                title: 'Nhịp vận hành hôm nay',
-                subtitle: 'Checklist đề xuất cho ca trực quản trị.',
-              ),
-              const SizedBox(height: 12),
-              const _OperationChecklistCard(),
               const SizedBox(height: 24),
             ],
           ),
@@ -172,15 +147,11 @@ class _AdminActionItem {
   const _AdminActionItem({
     required this.icon,
     required this.label,
-    required this.description,
-    required this.priority,
     required this.onTap,
   });
 
   final IconData icon;
   final String label;
-  final String description;
-  final String priority;
   final VoidCallback onTap;
 }
 
@@ -298,27 +269,16 @@ class _AdminHeroCard extends StatelessWidget {
 }
 
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title, required this.subtitle});
+  const _SectionHeader({required this.title});
 
   final String title;
-  final String subtitle;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          subtitle,
-          style: textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
-        ),
-      ],
+    return Text(
+      title,
+      style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
     );
   }
 }
@@ -443,31 +403,6 @@ class _AdminActionCard extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      action.description,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE8F3ED),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        'Ưu tiên: ${action.priority}',
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: const Color(0xFF25563E),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -477,92 +412,6 @@ class _AdminActionCard extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _OperationChecklistCard extends StatelessWidget {
-  const _OperationChecklistCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            _ChecklistItem(
-              icon: Icons.lock_reset_outlined,
-              title: 'Kiểm tra tài khoản bị báo cáo',
-              subtitle: 'Rà soát danh sách khóa/mở trước 10:00 mỗi ngày.',
-            ),
-            SizedBox(height: 10),
-            _ChecklistItem(
-              icon: Icons.domain_verification_outlined,
-              title: 'Xác thực hồ sơ doanh nghiệp mới',
-              subtitle: 'Đối soát thông tin pháp lý và trạng thái hoạt động.',
-            ),
-            SizedBox(height: 10),
-            _ChecklistItem(
-              icon: Icons.monitor_heart_outlined,
-              title: 'Theo dõi chỉ số hệ thống',
-              subtitle: 'Phát hiện bất thường để chủ động hỗ trợ người dùng.',
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ChecklistItem extends StatelessWidget {
-  const _ChecklistItem({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          height: 36,
-          width: 36,
-          decoration: BoxDecoration(
-            color: const Color(0xFFEFF6F0),
-            borderRadius: BorderRadius.circular(9),
-          ),
-          child: Icon(icon, size: 18, color: const Color(0xFF1F7A4A)),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

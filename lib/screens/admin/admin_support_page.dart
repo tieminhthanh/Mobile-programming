@@ -18,33 +18,22 @@ class AdminSupportPage extends StatelessWidget {
         children: [
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Kênh hỗ trợ nội bộ', style: textTheme.titleMedium),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   Text(
-                    'Sử dụng các kênh bên dưới để xử lý sự cố hệ thống, khóa/mở tài khoản và hỗ trợ vận hành.',
-                    style: textTheme.bodyMedium?.copyWith(color: Colors.grey[700]),
+                    'Email: support@thanhoMenh.vn',
+                    style: textTheme.bodyMedium,
                   ),
-                  const SizedBox(height: 8),
-                  const _SupportRow(
-                    icon: Icons.email_outlined,
-                    label: 'Email',
-                    value: 'support@thanhoMenh.vn',
-                  ),
-                  const SizedBox(height: 8),
-                  const _SupportRow(
-                    icon: Icons.phone_outlined,
-                    label: 'Hotline',
-                    value: '1900 0000',
-                  ),
-                  const SizedBox(height: 8),
-                  const _SupportRow(
-                    icon: Icons.access_time_outlined,
-                    label: 'Giờ hỗ trợ',
-                    value: '08:00 - 17:30',
+                  const SizedBox(height: 4),
+                  Text('Hotline: 1900 0000', style: textTheme.bodyMedium),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Giờ hỗ trợ: 08:00 - 17:30',
+                    style: textTheme.bodyMedium,
                   ),
                 ],
               ),
@@ -52,36 +41,16 @@ class AdminSupportPage extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Card(
-            child: ListTile(
-              leading: const Icon(Icons.rule_folder_outlined, color: Color(0xFF1E6B47)),
-              title: const Text('Quy trình xử lý'),
-              subtitle: const Text('1) Xác minh sự cố  2) Xử lý trên hệ thống  3) Cập nhật trạng thái cho người dùng'),
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Text(
+                'Quy trình xử lý: Xác minh sự cố -> Xử lý trên hệ thống -> Cập nhật trạng thái cho người dùng.',
+                style: textTheme.bodyMedium,
+              ),
             ),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _SupportRow extends StatelessWidget {
-  const _SupportRow({required this.icon, required this.label, required this.value});
-
-  final IconData icon;
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 18, color: const Color(0xFF1F7A4A)),
-        const SizedBox(width: 8),
-        Text('$label: ', style: Theme.of(context).textTheme.bodySmall),
-        Expanded(
-          child: Text(value, style: Theme.of(context).textTheme.bodyMedium),
-        ),
-      ],
     );
   }
 }
