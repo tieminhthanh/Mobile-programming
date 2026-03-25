@@ -1,10 +1,15 @@
 import 'package:intl/intl.dart';
 
+// =============================================================
+// app_formatter.dart
+// Tiện ích định dạng hiển thị toàn cục cho App
+// =============================================================
+
 class AppFormatter {
   // Private constructor để ngăn việc khởi tạo object (tối ưu bộ nhớ)
   const AppFormatter._();
 
-  // Khởi tạo NumberFormat 1 lần duy nhất thay vì tạo lại mỗi lần gọi hàm
+  // Khởi tạo các Formatters 1 lần duy nhất thay vì tạo lại mỗi lần gọi hàm
   static final NumberFormat _currencyFormat = NumberFormat.currency(
     locale: 'vi_VN',
     symbol: '₫',
@@ -12,11 +17,19 @@ class AppFormatter {
   );
 
   static final NumberFormat _numberFormat = NumberFormat('#,###', 'vi_VN');
+  
+  // Tận dụng intl để format ngày tháng đồng nhất với số/tiền
+  static final DateFormat _dateFormat = DateFormat('dd/MM/yyyy');
+  static final DateFormat _dateTimeFormat = DateFormat('HH:mm · dd/MM/yyyy');
+
+  // -----------------------------------------------------------
+  // 1. TIỀN TỆ & SỐ
+  // -----------------------------------------------------------
 
   /// Format: 1.500.000 ₫
   static String currency(double amount) => _currencyFormat.format(amount);
 
-  /// Format: 1,5 triệu / 150 nghìn (Xử lý được cả số âm)
+  /// Format: 1,5 triệu ₫ / 150 nghìn ₫ (Xử lý được cả số âm)
   static String currencyShort(double amount) {
     final isNegative = amount < 0;
     final absAmount = amount.abs();
@@ -33,10 +46,40 @@ class AppFormatter {
     return isNegative ? '-$result' : result;
   }
 
-  /// Format number with thousands separator
+  /// Format number with thousands separator: 1.500.000
   static String number(num value) {
     return _numberFormat.format(value);
   }
+
+  // -----------------------------------------------------------
+  // 2. NGÀY THÁNG (Được gộp từ class Formatter cũ)
+  // -----------------------------------------------------------
+
+  /// Format ngày: "2026-04-20 07:00" → "20/04/2026"
+  static String date(String? isoDate) {
+    if (isoDate == null || isoDate.isEmpty) return '';
+    try {
+      final dt = DateTime.parse(isoDate);
+      return _dateFormat.format(dt);
+    } catch (_) {
+      return isoDate;
+    }
+  }
+
+  /// Format ngày giờ: "2026-04-20 07:00" → "07:00 · 20/04/2026"
+  static String dateTime(String? isoDate) {
+    if (isoDate == null || isoDate.isEmpty) return '';
+    try {
+      final dt = DateTime.parse(isoDate);
+      return _dateTimeFormat.format(dt);
+    } catch (_) {
+      return isoDate;
+    }
+  }
+
+  // -----------------------------------------------------------
+  // 3. CÁC FORMAT KHÁC (Diện tích, Điện thoại)
+  // -----------------------------------------------------------
 
   /// Format area: 2,5 ha
   static String area(double hectares) => '${_trimDecimal(hectares)} ha';
@@ -49,6 +92,10 @@ class AppFormatter {
     }
     return raw;
   }
+
+  // -----------------------------------------------------------
+  // 4. HÀM HỖ TRỢ (Helpers)
+  // -----------------------------------------------------------
 
   /// Xử lý số thập phân: bỏ số 0 vô nghĩa và đổi dấu chấm thành phẩy
   static String _trimDecimal(double value) {
