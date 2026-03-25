@@ -19,6 +19,8 @@ class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
   String? _errorText;
   bool _isLoading = false;
+  bool _obscurePassword = true;
+  bool _obscureConfirm = true;
 
   @override
   void dispose() {
@@ -126,11 +128,21 @@ class _RegisterPageState extends State<RegisterPage> {
                         const SizedBox(height: 10),
                         TextFormField(
                           controller: _passwordController,
-                          obscureText: true,
+                          obscureText: _obscurePassword,
                           textInputAction: TextInputAction.next,
-                          decoration: const InputDecoration(
-                            prefixIcon: Icon(Icons.lock_outline),
+                          decoration: InputDecoration(
+                            prefixIcon: const Icon(Icons.lock_outline),
                             labelText: 'Mật khẩu',
+                            suffixIcon: IconButton(
+                              onPressed: () => setState(
+                                () => _obscurePassword = !_obscurePassword,
+                              ),
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                              ),
+                            ),
                           ),
                           validator: (value) {
                             if (value == null || value.length < 6) {
@@ -142,10 +154,20 @@ class _RegisterPageState extends State<RegisterPage> {
                         const SizedBox(height: 10),
                         TextFormField(
                           controller: _confirmController,
-                          obscureText: true,
-                          decoration: const InputDecoration(
-                            prefixIcon: Icon(Icons.verified_user_outlined),
+                          obscureText: _obscureConfirm,
+                          decoration: InputDecoration(
+                            prefixIcon: const Icon(Icons.verified_user_outlined),
                             labelText: 'Nhập lại mật khẩu',
+                            suffixIcon: IconButton(
+                              onPressed: () => setState(
+                                () => _obscureConfirm = !_obscureConfirm,
+                              ),
+                              icon: Icon(
+                                _obscureConfirm
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                              ),
+                            ),
                           ),
                           validator: (value) {
                             if (value != _passwordController.text) {

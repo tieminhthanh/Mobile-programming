@@ -55,7 +55,10 @@ class _LoginRequiredView extends StatelessWidget {
               const SizedBox(height: 12),
               ElevatedButton(
                 onPressed: () =>
-                    Navigator.of(context).pushReplacementNamed(loginRoute),
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                      loginRoute,
+                      (route) => false,
+                    ),
                 child: const Text('Đăng nhập'),
               ),
             ],
@@ -87,7 +90,10 @@ class _AccessDeniedView extends StatelessWidget {
               const SizedBox(height: 12),
               ElevatedButton(
                 onPressed: () =>
-                    Navigator.of(context).pushReplacementNamed(deniedRoute),
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                      deniedRoute,
+                      (route) => false,
+                    ),
                 child: const Text('Quay lại'),
               ),
             ],
