@@ -99,85 +99,6 @@ class HomePage extends StatelessWidget {
                 runSpacing: 12,
                 children: quickActions,
               ),
-              if (user?.role == UserRole.farmer) ...[
-                const SizedBox(height: 20),
-                _SectionHeader(title: 'Bạn đang cần gì hôm nay'),
-                const SizedBox(height: 8),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text('Bạn cần hỗ trợ gì hôm nay?', style: textTheme.titleSmall),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Nhấn vào nút dưới để mở tác vụ nhanh: xem địa chỉ, cập nhật thông tin hoặc liên hệ hỗ trợ.',
-                          style: textTheme.bodyMedium?.copyWith(color: Colors.grey[700]),
-                        ),
-                        const SizedBox(height: 12),
-                        ElevatedButton.icon(
-                          onPressed: () => Navigator.of(context).pushNamed(AppRoutes.profile),
-                          icon: const Icon(Icons.mic_none_outlined),
-                          label: const Text('Trợ lý nhanh'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-              const SizedBox(height: 20),
-              _SectionHeader(title: 'Vai trò hiện tại'),
-              const SizedBox(height: 8),
-              _CurrentRoleCard(
-                user: user,
-                onOpen: () {
-                  final role = user?.role;
-                  final route = switch (role) {
-                    UserRole.admin => AppRoutes.adminDashboard,
-                    UserRole.sme => AppRoutes.ownerDashboard,
-                    UserRole.farmer || null => AppRoutes.machineList,
-                  };
-                  Navigator.of(context).pushNamed(route);
-                },
-              ),
-              const SizedBox(height: 20),
-              _SectionHeader(title: 'Gợi ý hành động'),
-              const SizedBox(height: 8),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      Container(
-                        height: 40,
-                        width: 40,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFEFF6F0),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(Icons.eco_outlined, color: Color(0xFF1F7A4A)),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Hoàn thiện hồ sơ', style: textTheme.titleSmall),
-                            const SizedBox(height: 4),
-                            Text('Cập nhật thông tin cá nhân để được hỗ trợ nhanh hơn.',
-                                style: textTheme.bodySmall?.copyWith(color: Colors.grey[600])),
-                          ],
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pushNamed(AppRoutes.profile),
-                        child: const Text('Cập nhật'),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
               const SizedBox(height: 24),
             ],
           ),
@@ -484,46 +405,6 @@ class _QuickAction extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _CurrentRoleCard extends StatelessWidget {
-  const _CurrentRoleCard({required this.user, required this.onOpen});
-
-  final AppUser? user;
-  final VoidCallback onOpen;
-
-  @override
-  Widget build(BuildContext context) {
-    final role = user?.role;
-    final title = role?.label ?? 'Chưa xác định';
-    final subtitle = role == UserRole.admin
-      ? 'Quản trị hệ thống, báo cáo và xử lý hỗ trợ quản trị.'
-        : role == UserRole.sme
-        ? 'Theo dõi ESG và quản trị hồ sơ doanh nghiệp.'
-        : 'Theo dõi mùa vụ và quản lý thông tin cơ bản.';
-    final icon = role == UserRole.admin
-        ? Icons.admin_panel_settings_outlined
-        : role == UserRole.sme
-            ? Icons.business_outlined
-            : Icons.agriculture_outlined;
-
-    return Card(
-      child: ListTile(
-        leading: Icon(icon, color: const Color(0xFF1F7A4A)),
-        title: Text(title),
-        subtitle: Text(
-          subtitle,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
-              ),
-        ),
-        trailing: TextButton(
-          onPressed: onOpen,
-          child: const Text('Mở'),
         ),
       ),
     );
