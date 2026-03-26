@@ -189,8 +189,18 @@ class MachineRepository {
   Future<bool> insertMachine(AgriMachine machine) async {
     try {
       final db = await dbService.provider.database;
-      final result = await db.insert('logistics_AgriMachines', machine.toMap());
-      return result > 0;
+      final machineId = await db.insert('logistics_AgriMachines', machine.toMap());
+      
+      // Xử lý lưu ảnh nếu có
+      if (machine.imageUrl != null && machine.imageUrl!.isNotEmpty) {
+        await db.insert('Images', {
+          'ReferenceId': machineId,
+          'ReferenceType': 'MACHINE',
+          'ImageUrl': machine.imageUrl,
+          'IsPrimary': 1,
+        });
+      }
+      return machineId > 0;
     } catch (e) {
       print('Lỗi khi thêm máy: $e');
       return false;
@@ -207,6 +217,18 @@ class MachineRepository {
         where: 'MachineId = ?',
         whereArgs: [machine.machineId],
       );
+
+      // Xử lý cập nhật/xóa ảnh
+      await db.delete('Images', where: 'ReferenceId = ? AND ReferenceType = ?', whereArgs: [machine.machineId, 'MACHINE']);
+      
+      if (machine.imageUrl != null && machine.imageUrl!.isNotEmpty) {
+        await db.insert('Images', {
+          'ReferenceId': machine.machineId,
+          'ReferenceType': 'MACHINE',
+          'ImageUrl': machine.imageUrl,
+          'IsPrimary': 1,
+        });
+      }
       return result > 0;
     } catch (e) {
       print('Lỗi khi cập nhật máy: $e');
