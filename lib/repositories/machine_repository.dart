@@ -230,10 +230,10 @@ class MachineRepository {
     }
   }
 
-  /// Lấy số liệu thống kê cho chủ máy
+    /// Lấy số liệu thống kê cho chủ máy (bao gồm cả doanh thu bán hàng)
   Future<Map<String, dynamic>> getOwnerStats(int ownerId) async {
     try {
-      // 1. Tính tổng doanh thu từ các đơn đã hoàn thành
+      // 1. Tính tổng doanh thu từ các đơn thuê máy đã hoàn thành
       final revenueQuery = await dbService.rawQuery(
         '''
         SELECT SUM(TotalPrice) as totalRevenue, COUNT(BookingId) as completedCount
@@ -244,7 +244,27 @@ class MachineRepository {
         [ownerId],
       );
 
-      // 2. Đếm tổng số máy đang sở hữu
+      // 2. Tính tổng doanh thu từ việc bán sản phẩm đã giao hoàn thành
+      final productRevenueQuery = await dbService.rawQuery(
+        '''
+        SELECT SUM(oi.Price * oi.Quantity) as totalProductRevenue, COUNT(DISTINCT o.OrderId) as completedProductOrders
+        FROM commerce_Orders o
+        JOIN commerce_OrderItems oi ON o.OrderId = oi.OrderId
+        JOIN commerce_Products p ON oi.ProductId = p.ProductId
+        WHERE p.SellerId = ? AND o.Status = 'COMPLETED'
+        ''',
+        [ownerId],
+      );
+
+      final machineRevenue = (revenueQuery.first['totalRevenue'] ?? 0.0) as num;
+      final productRevenue = (productRevenueQuery.first['totalProductRevenue'] ?? 0.0) as num;
+      final totalRevenue = machineRevenue.toDouble() + productRevenue.toDouble();
+
+      final machineCompleted = (revenueQuery.first['completedCount'] ?? 0) as int;
+      final productCompleted = (productRevenueQuery.first['completedProductOrders'] ?? 0) as int;
+      final totalCompleted = machineCompleted + productCompleted;
+
+      // 3. Đếm tổng số máy đang sở hữu
       final machineQuery = await dbService.rawQuery(
         '''
         SELECT COUNT(MachineId) as machineCount FROM logistics_AgriMachines WHERE OwnerId = ?
@@ -253,8 +273,8 @@ class MachineRepository {
       );
 
       return {
-        'revenue': revenueQuery.first['totalRevenue'] ?? 0.0,
-        'completed': revenueQuery.first['completedCount'] ?? 0,
+        'revenue': totalRevenue,
+        'completed': totalCompleted,
         'totalMachines': machineQuery.first['machineCount'] ?? 0,
       };
     } catch (e) {
@@ -262,6 +282,7 @@ class MachineRepository {
       return {'revenue': 0.0, 'completed': 0, 'totalMachines': 0};
     }
   }
+
 
   /// Kiểm tra xem máy có đơn hàng nào đang 'BOOKED' hoặc 'IN_PROGRESS' không
   Future<bool> hasActiveBookings(int machineId) async {
