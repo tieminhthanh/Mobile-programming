@@ -14,12 +14,14 @@ class FarmImageScreen extends StatefulWidget {
   final String title;
   final String? referenceId;
   final String referenceType;
+  final String? ownerId; // ID của nông dân sở hữu farms (khi xem farm của người khác)
 
   const FarmImageScreen({
     super.key,
     required this.title,
     required this.referenceType,
     this.referenceId,
+    this.ownerId,
   });
 
   @override
@@ -33,6 +35,7 @@ class _FarmImageScreenState extends State<FarmImageScreen> {
   File? _selectedImage;
   bool _isPrimaryImage = false;
   bool _isUploading = false;
+  bool _showAllImages = false;
 
   // UI State
   bool _showFarmList = true;
@@ -65,7 +68,14 @@ class _FarmImageScreenState extends State<FarmImageScreen> {
 
   Future<void> _loadFarmerFarms() async {
     final sessionUser = SessionController.instance.currentUser.value;
-    if (sessionUser != null && sessionUser.role == UserRole.farmer) {
+    
+    // Nếu có ownerId (xem farm của người khác), load farms của người đó
+    if (widget.ownerId != null && widget.ownerId!.isNotEmpty) {
+      await _controller.loadFarmsByFarmerId(widget.ownerId!);
+      setState(() {
+        _farmerFarms = _controller.farms;
+      });
+    } else if (sessionUser != null && sessionUser.role == UserRole.farmer) {
       // Load farms by farmer ID
       await _controller.loadFarmsByFarmerId(sessionUser.id.toString());
       setState(() {
@@ -165,6 +175,22 @@ class _FarmImageScreenState extends State<FarmImageScreen> {
 
       // Reload images
       await _controller.loadImages(_selectedFarm!.farmId.toString());
+    }
+  }
+
+  Future<void> _setPrimaryImage(FarmerImage image) async {
+    if (_selectedFarm == null) return;
+
+    final ok = await _controller.setPrimaryImage(image);
+
+    if (ok) {
+      // Reload images to reflect changes
+      await _controller.loadImages(_selectedFarm!.farmId.toString());
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Đã set làm ảnh chính")),
+      );
+    } else {
+      _showError("Không thể set làm ảnh chính");
     }
   }
 
@@ -388,28 +414,58 @@ class _FarmImageScreenState extends State<FarmImageScreen> {
                 const SizedBox(height: 16),
               ],
 
-              // Ảnh phụ (hiển thị tối đa 4 ảnh)
+              // Ảnh phụ
               if (secondaryImages.isNotEmpty) ...[
-                const Text(
-                  'Ảnh phụ',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Ảnh phụ',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (!_showAllImages && secondaryImages.length > 4)
+                      TextButton(
+                        onPressed: () {
+                          setState(() => _showAllImages = true);
+                        },
+                        child: Text(
+                          'Xem tất cả (${secondaryImages.length})',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.blue,
+                          ),
+                        ),
+                      ),
+                    if (_showAllImages && secondaryImages.length > 4)
+                      TextButton(
+                        onPressed: () {
+                          setState(() => _showAllImages = false);
+                        },
+                        child: const Text(
+                          'Thu gọn',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.blue,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
                 const SizedBox(height: 8),
                 GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
+                    crossAxisCount: 3,
                     crossAxisSpacing: 8,
                     mainAxisSpacing: 8,
                   ),
-                  itemCount: secondaryImages.length > 4 ? 4 : secondaryImages.length,
+                  itemCount: _showAllImages ? secondaryImages.length : (secondaryImages.length > 4 ? 4 : secondaryImages.length),
                   itemBuilder: (context, index) {
                     final image = secondaryImages[index];
-                    final showPlus = index == 3 && secondaryImages.length > 4;
 
                     return GestureDetector(
                       onTap: () => _showImageGallery(farmImages, farmImages.indexOf(image)),
@@ -417,6 +473,10 @@ class _FarmImageScreenState extends State<FarmImageScreen> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
                           color: Colors.grey.shade200,
+                          border: Border.all(
+                            color: image.isPrimary ? Colors.green : Colors.transparent,
+                            width: 2,
+                          ),
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(8),
@@ -430,20 +490,32 @@ class _FarmImageScreenState extends State<FarmImageScreen> {
                                   child: Icon(Icons.broken_image, size: 32),
                                 ),
                               ),
-                              if (showPlus)
-                                Container(
-                                  color: Colors.black54,
-                                  child: Center(
-                                    child: Text(
-                                      '+${secondaryImages.length - 3}',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                              // Nút set làm ảnh chính
+                              Positioned(
+                                bottom: 4,
+                                right: 4,
+                                child: GestureDetector(
+                                  onTap: () => _setPrimaryImage(image),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: image.isPrimary ? Colors.yellow : Colors.white,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.3),
+                                          blurRadius: 2,
+                                        ),
+                                      ],
+                                    ),
+                                    child: Icon(
+                                      image.isPrimary ? Icons.star : Icons.star_border,
+                                      size: 16,
+                                      color: image.isPrimary ? Colors.orange : Colors.grey,
                                     ),
                                   ),
                                 ),
+                              ),
                             ],
                           ),
                         ),
@@ -451,6 +523,8 @@ class _FarmImageScreenState extends State<FarmImageScreen> {
                     );
                   },
                 ),
+                   
+                 
                 const SizedBox(height: 16),
               ],
 

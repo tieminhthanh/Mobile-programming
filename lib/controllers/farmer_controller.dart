@@ -256,4 +256,31 @@ class FarmerController extends ChangeNotifier {
       return false;
     }
   }
+
+  // =============================
+  // SET PRIMARY IMAGE
+  // =============================
+  Future<bool> setPrimaryImage(FarmerImage image) async {
+    try {
+      final success = await _repo.setPrimaryImage(image.imageId, image.referenceId);
+      if (success) {
+        final farmId = image.referenceId;
+        if (imagesByFarm.containsKey(farmId)) {
+          // Update all images: set selected to primary, others to not primary
+          imagesByFarm[farmId] = imagesByFarm[farmId]!.map((img) {
+            if (img.imageId == image.imageId) {
+              return img.copyWith(isPrimary: true);
+            } else {
+              return img.copyWith(isPrimary: false);
+            }
+          }).toList();
+          notifyListeners();
+        }
+      }
+      return success;
+    } catch (e) {
+      print('Error setting primary image: $e');
+      return false;
+    }
+  }
 }

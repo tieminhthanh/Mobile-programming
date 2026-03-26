@@ -100,9 +100,16 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
         // Farmer role only can create/update own farm
         final sessionUser = SessionController.instance.currentUser.value;
         if (sessionUser?.role == UserRole.farmer) {
-          _selectedFarmerId = sessionUser?.id.toString();
-          _isOwner =
-              widget.farm == null || widget.farm!.farmerId == _selectedFarmerId;
+          // Nếu xem farm của người khác (viewing only), giữ farm.farmerId
+          // Nếu xem/edit farm của mình hoặc tạo mới, set thành sessionUser.id
+          if (widget.farm != null && widget.farm!.farmerId != sessionUser?.id.toString()) {
+            // Viewing farm of another farmer - keep the owner's ID
+            _selectedFarmerId = widget.farm!.farmerId;
+          } else {
+            // Creating new or editing own farm
+            _selectedFarmerId = sessionUser?.id.toString();
+            _isOwner = true;
+          }
         }
 
         _farmersLoading = false;
@@ -479,7 +486,7 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
               controller: _farmNameController,
               hint: 'Nhập tên trang trại',
               prefixIcon: Icons.landscape,
-              enabled: _isOwner,
+              readOnly: !_isOwner,
             ),
             const SizedBox(height: 16),
 
@@ -493,7 +500,7 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
               controller: _locationController,
               hint: 'Nhập địa điểm/tọa độ',
               prefixIcon: Icons.location_on,
-              enabled: _isOwner,
+              readOnly: !_isOwner,
             ),
             const SizedBox(height: 16),
 
@@ -510,7 +517,7 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              enabled: _isOwner,
+              readOnly: !_isOwner,
             ),
             const SizedBox(height: 16),
 
@@ -571,7 +578,7 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
               controller: _certificationsController,
               hint: 'Ví dụ: VietGAP, Organic...',
               prefixIcon: Icons.verified,
-              enabled: _isOwner,
+              readOnly: !_isOwner,
             ),
             const SizedBox(height: 32),
 

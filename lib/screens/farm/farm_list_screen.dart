@@ -25,12 +25,30 @@ class _FarmListScreenState extends State<FarmListScreen> {
   final TextEditingController _searchController = TextEditingController();
   late FarmerController _controller;
   String _searchQuery = '';
+  bool _showOnlyMyFarms = false;
+  Map<String, String> _farmerNamesById = {};
 
   @override
   void initState() {
     super.initState();
     _controller = context.read<FarmerController>();
+    _reloadData();
+  }
+
+  Future<void> _reloadData() async {
+    await _loadFarmerList();
     _loadFarms();
+  }
+
+  Future<void> _loadFarmerList() async {
+    await _controller.loadFarmers();
+    _farmerNamesById = {
+      for (var farmer in _controller.farmers)
+        farmer.userId: farmer.fullName.isNotEmpty
+            ? farmer.fullName
+            : farmer.village,
+    };
+    setState(() {});
   }
 
   @override
@@ -41,8 +59,13 @@ class _FarmListScreenState extends State<FarmListScreen> {
 
   void _loadFarms() {
     final sessionUser = SessionController.instance.currentUser.value;
+
     if (sessionUser != null && sessionUser.role == UserRole.farmer) {
-      _controller.loadFarmsByFarmerId(sessionUser.id.toString());
+      if (_showOnlyMyFarms) {
+        _controller.loadFarmsByFarmerId(sessionUser.id.toString());
+      } else {
+        _controller.loadAllFarms();
+      }
     } else {
       _controller.loadAllFarms();
     }
@@ -58,12 +81,13 @@ class _FarmListScreenState extends State<FarmListScreen> {
   Widget build(BuildContext context) {
     final sessionUser = SessionController.instance.currentUser.value;
     final isFarmerRole = sessionUser?.role == UserRole.farmer;
+    final title = isFarmerRole
+        ? (_showOnlyMyFarms ? 'Trang trại của tôi' : 'Tất cả Trang trại')
+        : 'Tất cả Trang trại';
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          isFarmerRole ? 'Trang trại của tôi' : 'Tất cả Trang trại',
-        ),
+        title: Text(title),
         centerTitle: true,
         elevation: 0,
       ),
@@ -106,6 +130,20 @@ class _FarmListScreenState extends State<FarmListScreen> {
           return Column(
             children: [
               // Search Bar
+              if (isFarmerRole)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: CustomButton(
+                    label: _showOnlyMyFarms ? 'Xem tất cả trang trại' : 'Xem trang trại của tôi',
+                    variant: ButtonVariant.outlined,
+                    onPressed: () {
+                      setState(() {
+                        _showOnlyMyFarms = !_showOnlyMyFarms;
+                      });
+                      _loadFarms();
+                    },
+                  ),
+                ),
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: TextField(
@@ -164,6 +202,7 @@ class _FarmListScreenState extends State<FarmListScreen> {
                           final farm = visibleFarms[index];
                           return FarmCard(
                             farm: farm,
+                            ownerName: _farmerNamesById[farm.farmerId],
                             onTap: () => _navigateToDetailScreen(farm),
                           );
                         },
@@ -198,11 +237,13 @@ class _FarmListScreenState extends State<FarmListScreen> {
 
 class FarmCard extends StatelessWidget {
   final Farm farm;
+  final String? ownerName;
   final VoidCallback onTap;
 
   const FarmCard({
     super.key,
     required this.farm,
+    this.ownerName,
     required this.onTap,
   });
 
@@ -267,6 +308,18 @@ class FarmCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
+                        if (ownerName != null && ownerName!.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            'Chủ: $ownerName',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade700,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ],
                     ),
                   ),
