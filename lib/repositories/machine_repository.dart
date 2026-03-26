@@ -9,6 +9,18 @@ class MachineRepository {
 
   MachineRepository(this.dbService);
 
+  List<AgriMachine> _mapToMachines(List<Map<String, dynamic>> maps) {
+    final List<AgriMachine> result = [];
+    for (var m in maps) {
+      try {
+        result.add(AgriMachine.fromMap(m));
+      } catch (e) {
+        print('Lỗi parse 1 dòng AgriMachine: $e | row: $m');
+      }
+    }
+    return result;
+  }
+
   /// Lấy danh sách tất cả các máy nông nghiệp đang rảnh rỗi và đã được duyệt
   Future<List<AgriMachine>> getAvailableMachines() async {
     try {
@@ -25,8 +37,8 @@ class MachineRepository {
       // Gọi hàm rawQuery từ file database_helper.dart của bạn
       final List<Map<String, dynamic>> maps = await dbService.rawQuery(sql);
 
-      // Đổ dữ liệu thô vào khuôn đúc Model
-      return maps.map((map) => AgriMachine.fromMap(map)).toList();
+      // Đổ dữ liệu thô vào khuôn đúc Model an toàn
+      return _mapToMachines(maps);
     } catch (e) {
       // Bắt lỗi để app không bị crash nếu lỡ câu SQL có sai sót
       print('Lỗi khi lấy danh sách máy: $e');
@@ -162,7 +174,7 @@ class MachineRepository {
       ''';
 
       final maps = await dbService.rawQuery(sql, [ownerId]);
-      return maps.map((map) => AgriMachine.fromMap(map)).toList();
+      return _mapToMachines(maps);
     } catch (e) {
       print('Lỗi khi lấy danh sách máy của tôi: $e');
       return [];
@@ -337,7 +349,7 @@ class MachineRepository {
         ORDER BY m.MachineId DESC
       ''';
       final maps = await dbService.rawQuery(sql);
-      return maps.map((map) => AgriMachine.fromMap(map)).toList();
+      return _mapToMachines(maps);
     } catch (e) {
       print('Lỗi khi lấy danh sách máy chờ duyệt: $e');
       return [];

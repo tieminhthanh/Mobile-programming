@@ -60,7 +60,10 @@ class _OwnerMachineListScreenState extends State<OwnerMachineListScreen> {
                 ),
               );
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              minimumSize: Size.zero,
+            ),
             child: const Text('Xóa', style: TextStyle(color: Colors.white)),
           ),
         ],

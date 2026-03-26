@@ -294,6 +294,7 @@ class _MachineDetailScreenState extends State<MachineDetailScreen> {
               ElevatedButton(
                 onPressed: _submitBooking,
                 style: ElevatedButton.styleFrom(
+                  minimumSize: Size.zero,
                   backgroundColor: const Color(0xFF0F5C45),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 32,

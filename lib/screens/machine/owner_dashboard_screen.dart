@@ -42,10 +42,9 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
               ),
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pushNamedAndRemoveUntil(
-                    AppRoutes.login,
-                    (route) => false,
-                  );
+                  Navigator.of(
+                    context,
+                  ).pushNamedAndRemoveUntil(AppRoutes.login, (route) => false);
                   SessionController.instance.logout();
                 },
                 child: const Text('Đăng xuất'),

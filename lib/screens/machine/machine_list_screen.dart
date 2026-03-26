@@ -33,25 +33,10 @@ class _MachineListScreenState extends State<MachineListScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: false,
-        title: const Text(
-          'Thuê Máy Nông Nghiệp',
-          style: TextStyle(
-            color: Color(0xFF333333),
-            fontWeight: FontWeight.bold,
-            fontSize: 22,
-          ),
-        ),
-        // THÊM ĐOẠN NÀY VÀO:
+        title: const Text('Thuê Máy Nông Nghiệp'),
         actions: [
           IconButton(
-            icon: const Icon(
-              Icons.receipt_long,
-              color: Color(0xFF0F5C45),
-              size: 28,
-            ),
+            icon: const Icon(Icons.receipt_long),
             tooltip: 'Lịch sử thuê máy',
             onPressed: () {
               Navigator.push(
@@ -226,6 +211,7 @@ class _MachineListScreenState extends State<MachineListScreen> {
                         );
                       },
                       style: ElevatedButton.styleFrom(
+                        minimumSize: Size.zero, // SỬA LỖI SIZE INFINITY TỪ THEME
                         backgroundColor: const Color(0xFF0F5C45),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 24,
