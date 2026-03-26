@@ -323,4 +323,41 @@ class MachineRepository {
       return false;
     }
   }
+
+  /// Lấy danh sách máy chờ duyệt (isApproved = 0)
+  Future<List<AgriMachine>> getPendingMachines() async {
+    try {
+      const String sql = '''
+        SELECT m.*, i.ImageUrl 
+        FROM logistics_AgriMachines m
+        LEFT JOIN Images i ON m.MachineId = i.ReferenceId 
+                           AND i.ReferenceType = 'MACHINE' 
+                           AND i.IsPrimary = 1
+        WHERE m.IsApproved = 0
+        ORDER BY m.MachineId DESC
+      ''';
+      final maps = await dbService.rawQuery(sql);
+      return maps.map((map) => AgriMachine.fromMap(map)).toList();
+    } catch (e) {
+      print('Lỗi khi lấy danh sách máy chờ duyệt: $e');
+      return [];
+    }
+  }
+
+  /// Duyệt máy
+  Future<bool> approveMachine(int machineId) async {
+    try {
+      final db = await dbService.provider.database;
+      final result = await db.update(
+        'logistics_AgriMachines',
+        {'IsApproved': 1},
+        where: 'MachineId = ?',
+        whereArgs: [machineId],
+      );
+      return result > 0;
+    } catch (e) {
+      print('Lỗi khi duyệt máy: $e');
+      return false;
+    }
+  }
 }
