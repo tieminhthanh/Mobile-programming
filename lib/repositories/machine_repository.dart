@@ -372,4 +372,27 @@ class MachineRepository {
       return false;
     }
   }
+
+  /// Kiểm tra trùng lịch trước khi cho phép đặt máy
+  Future<bool> checkTimeOverlap(int machineId, String startTime, String endTime) async {
+    try {
+      final String sql = '''
+        SELECT COUNT(*) as count 
+        FROM logistics_MachineBookings 
+        WHERE MachineId = ? 
+          AND Status IN ('BOOKED', 'IN_PROGRESS')
+          AND (StartTime < ? AND EndTime > ?)
+      ''';
+      
+      final result = await dbService.rawQuery(
+        sql,
+        [machineId, endTime, startTime],
+      );
+
+      return (result.first['count'] as int) > 0;
+    } catch (e) {
+      print('Lỗi kiểm tra trùng lịch: $e');
+      return true; // Chặn nếu lỗi truy vấn
+    }
+  }
 }
