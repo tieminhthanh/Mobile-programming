@@ -144,12 +144,42 @@ class _OwnerMachineListScreenState extends State<OwnerMachineListScreen> {
                   ),
                   subtitle: Padding(
                     padding: const EdgeInsets.only(top: 4.0),
-                    child: Text(
-                      '${AppFormatter.currencyShort(machine.basePricePerHour)}/giờ',
-                      style: const TextStyle(
-                        color: Color(0xFF0F5C45),
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${AppFormatter.currencyShort(machine.basePricePerHour)}/giờ',
+                          style: const TextStyle(
+                            color: Color(0xFF0F5C45),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: machine.isApproved == 1
+                                ? Colors.green.withOpacity(0.1)
+                                : Colors.orange.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            machine.isApproved == 1
+                                ? 'Đã duyệt'
+                                : 'Đang chờ duyệt',
+                            style: TextStyle(
+                              color: machine.isApproved == 1
+                                  ? Colors.green
+                                  : Colors.orange,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   trailing: Row(
