@@ -1,4 +1,4 @@
-﻿class AppRoutes {
+class AppRoutes {
   static const home = '/';
   static const login = '/login';
   static const register = '/register';
@@ -14,6 +14,7 @@
   static const ownerDashboard = '/owner/dashboard';
   static const systemStats = '/admin/system-stats';
   static const adminSupport = '/admin/support';
+  static const adminMachineApproval = '/admin/machine-approval';
   static const machineList = '/machine-list';
   static const ownerBookings = '/owner/bookings';
   static const ownerCalendar = '/owner/calendar';

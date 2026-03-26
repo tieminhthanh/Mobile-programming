@@ -103,13 +103,24 @@ class MachineController extends ChangeNotifier {
       return false;
     }
 
+    final startStr = start.toIso8601String();
+    final endStr = end.toIso8601String();
+
+    // KIỂM TRA TRÙNG LỊCH THUÊ
+    final isOverlap = await _repository.checkTimeOverlap(machineId, startStr, endStr);
+    if (isOverlap) {
+      bookingErrorMessage = 'Khung giờ này máy đã có lịch bận. Vui lòng chọn khung giờ khác!';
+      notifyListeners();
+      return false;
+    }
+
     final success = await _repository.bookMachine(
       machineId: machineId,
       farmId: user.id,
       // Tạm thời dùng userId làm farmId
       bookerId: user.id,
-      startTime: start.toIso8601String(),
-      endTime: end.toIso8601String(),
+      startTime: startStr,
+      endTime: endStr,
       totalPrice: totalPrice,
     );
 
@@ -312,5 +323,36 @@ class MachineController extends ChangeNotifier {
 
   Future<bool> checkMachineBusy(int machineId) async {
     return await _repository.hasActiveBookings(machineId);
+  }
+
+  // ==========================================
+  // 9. QUẢN LÝ DUYỆT MÁY (CHO ADMIN)
+  // ==========================================
+  List<AgriMachine> pendingMachines = [];
+  bool isLoadingPending = false;
+
+  Future<void> fetchPendingMachines() async {
+    final user = _currentUser;
+    if (user == null || user.role != UserRole.admin) return;
+
+    isLoadingPending = true;
+    notifyListeners();
+
+    pendingMachines = await _repository.getPendingMachines();
+
+    isLoadingPending = false;
+    notifyListeners();
+  }
+
+  Future<bool> approveMachine(int machineId) async {
+    final user = _currentUser;
+    if (user == null || user.role != UserRole.admin) return false;
+
+    final success = await _repository.approveMachine(machineId);
+    if (success) {
+      pendingMachines.removeWhere((m) => m.machineId == machineId);
+      notifyListeners();
+    }
+    return success;
   }
 }

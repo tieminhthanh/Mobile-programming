@@ -9,6 +9,18 @@ class MachineRepository {
 
   MachineRepository(this.dbService);
 
+  List<AgriMachine> _mapToMachines(List<Map<String, dynamic>> maps) {
+    final List<AgriMachine> result = [];
+    for (var m in maps) {
+      try {
+        result.add(AgriMachine.fromMap(m));
+      } catch (e) {
+        print('Lỗi parse 1 dòng AgriMachine: $e | row: $m');
+      }
+    }
+    return result;
+  }
+
   /// Lấy danh sách tất cả các máy nông nghiệp đang rảnh rỗi và đã được duyệt
   Future<List<AgriMachine>> getAvailableMachines() async {
     try {
@@ -25,8 +37,8 @@ class MachineRepository {
       // Gọi hàm rawQuery từ file database_helper.dart của bạn
       final List<Map<String, dynamic>> maps = await dbService.rawQuery(sql);
 
-      // Đổ dữ liệu thô vào khuôn đúc Model
-      return maps.map((map) => AgriMachine.fromMap(map)).toList();
+      // Đổ dữ liệu thô vào khuôn đúc Model an toàn
+      return _mapToMachines(maps);
     } catch (e) {
       // Bắt lỗi để app không bị crash nếu lỡ câu SQL có sai sót
       print('Lỗi khi lấy danh sách máy: $e');
@@ -162,7 +174,7 @@ class MachineRepository {
       ''';
 
       final maps = await dbService.rawQuery(sql, [ownerId]);
-      return maps.map((map) => AgriMachine.fromMap(map)).toList();
+      return _mapToMachines(maps);
     } catch (e) {
       print('Lỗi khi lấy danh sách máy của tôi: $e');
       return [];
@@ -189,8 +201,18 @@ class MachineRepository {
   Future<bool> insertMachine(AgriMachine machine) async {
     try {
       final db = await dbService.provider.database;
-      final result = await db.insert('logistics_AgriMachines', machine.toMap());
-      return result > 0;
+      final machineId = await db.insert('logistics_AgriMachines', machine.toMap());
+      
+      // Xử lý lưu ảnh nếu có
+      if (machine.imageUrl != null && machine.imageUrl!.isNotEmpty) {
+        await db.insert('Images', {
+          'ReferenceId': machineId,
+          'ReferenceType': 'MACHINE',
+          'ImageUrl': machine.imageUrl,
+          'IsPrimary': 1,
+        });
+      }
+      return machineId > 0;
     } catch (e) {
       print('Lỗi khi thêm máy: $e');
       return false;
@@ -207,6 +229,18 @@ class MachineRepository {
         where: 'MachineId = ?',
         whereArgs: [machine.machineId],
       );
+
+      // Xử lý cập nhật/xóa ảnh
+      await db.delete('Images', where: 'ReferenceId = ? AND ReferenceType = ?', whereArgs: [machine.machineId, 'MACHINE']);
+      
+      if (machine.imageUrl != null && machine.imageUrl!.isNotEmpty) {
+        await db.insert('Images', {
+          'ReferenceId': machine.machineId,
+          'ReferenceType': 'MACHINE',
+          'ImageUrl': machine.imageUrl,
+          'IsPrimary': 1,
+        });
+      }
       return result > 0;
     } catch (e) {
       print('Lỗi khi cập nhật máy: $e');
@@ -230,10 +264,10 @@ class MachineRepository {
     }
   }
 
-  /// Lấy số liệu thống kê cho chủ máy
+    /// Lấy số liệu thống kê cho chủ máy (bao gồm cả doanh thu bán hàng)
   Future<Map<String, dynamic>> getOwnerStats(int ownerId) async {
     try {
-      // 1. Tính tổng doanh thu từ các đơn đã hoàn thành
+      // 1. Tính tổng doanh thu từ các đơn thuê máy đã hoàn thành
       final revenueQuery = await dbService.rawQuery(
         '''
         SELECT SUM(TotalPrice) as totalRevenue, COUNT(BookingId) as completedCount
@@ -244,7 +278,27 @@ class MachineRepository {
         [ownerId],
       );
 
-      // 2. Đếm tổng số máy đang sở hữu
+      // 2. Tính tổng doanh thu từ việc bán sản phẩm đã giao hoàn thành
+      final productRevenueQuery = await dbService.rawQuery(
+        '''
+        SELECT SUM(oi.Price * oi.Quantity) as totalProductRevenue, COUNT(DISTINCT o.OrderId) as completedProductOrders
+        FROM commerce_Orders o
+        JOIN commerce_OrderItems oi ON o.OrderId = oi.OrderId
+        JOIN commerce_Products p ON oi.ProductId = p.ProductId
+        WHERE p.SellerId = ? AND o.Status = 'COMPLETED'
+        ''',
+        [ownerId],
+      );
+
+      final machineRevenue = (revenueQuery.first['totalRevenue'] ?? 0.0) as num;
+      final productRevenue = (productRevenueQuery.first['totalProductRevenue'] ?? 0.0) as num;
+      final totalRevenue = machineRevenue.toDouble() + productRevenue.toDouble();
+
+      final machineCompleted = (revenueQuery.first['completedCount'] ?? 0) as int;
+      final productCompleted = (productRevenueQuery.first['completedProductOrders'] ?? 0) as int;
+      final totalCompleted = machineCompleted + productCompleted;
+
+      // 3. Đếm tổng số máy đang sở hữu
       final machineQuery = await dbService.rawQuery(
         '''
         SELECT COUNT(MachineId) as machineCount FROM logistics_AgriMachines WHERE OwnerId = ?
@@ -253,8 +307,8 @@ class MachineRepository {
       );
 
       return {
-        'revenue': revenueQuery.first['totalRevenue'] ?? 0.0,
-        'completed': revenueQuery.first['completedCount'] ?? 0,
+        'revenue': totalRevenue,
+        'completed': totalCompleted,
         'totalMachines': machineQuery.first['machineCount'] ?? 0,
       };
     } catch (e) {
@@ -262,6 +316,7 @@ class MachineRepository {
       return {'revenue': 0.0, 'completed': 0, 'totalMachines': 0};
     }
   }
+
 
   /// Kiểm tra xem máy có đơn hàng nào đang 'BOOKED' hoặc 'IN_PROGRESS' không
   Future<bool> hasActiveBookings(int machineId) async {
@@ -278,6 +333,66 @@ class MachineRepository {
       return (result.first['count'] as int) > 0;
     } catch (e) {
       return false;
+    }
+  }
+
+  /// Lấy danh sách máy chờ duyệt (isApproved = 0)
+  Future<List<AgriMachine>> getPendingMachines() async {
+    try {
+      const String sql = '''
+        SELECT m.*, i.ImageUrl 
+        FROM logistics_AgriMachines m
+        LEFT JOIN Images i ON m.MachineId = i.ReferenceId 
+                           AND i.ReferenceType = 'MACHINE' 
+                           AND i.IsPrimary = 1
+        WHERE m.IsApproved = 0
+        ORDER BY m.MachineId DESC
+      ''';
+      final maps = await dbService.rawQuery(sql);
+      return _mapToMachines(maps);
+    } catch (e) {
+      print('Lỗi khi lấy danh sách máy chờ duyệt: $e');
+      return [];
+    }
+  }
+
+  /// Duyệt máy
+  Future<bool> approveMachine(int machineId) async {
+    try {
+      final db = await dbService.provider.database;
+      final result = await db.update(
+        'logistics_AgriMachines',
+        {'IsApproved': 1},
+        where: 'MachineId = ?',
+        whereArgs: [machineId],
+      );
+      return result > 0;
+    } catch (e) {
+      print('Lỗi khi duyệt máy: $e');
+      return false;
+    }
+  }
+
+  /// Kiểm tra trùng lịch trước khi cho phép đặt máy
+  Future<bool> checkTimeOverlap(int machineId, String startTime, String endTime) async {
+    try {
+      final String sql = '''
+        SELECT COUNT(*) as count 
+        FROM logistics_MachineBookings 
+        WHERE MachineId = ? 
+          AND Status IN ('BOOKED', 'IN_PROGRESS')
+          AND (StartTime < ? AND EndTime > ?)
+      ''';
+      
+      final result = await dbService.rawQuery(
+        sql,
+        [machineId, endTime, startTime],
+      );
+
+      return (result.first['count'] as int) > 0;
+    } catch (e) {
+      print('Lỗi kiểm tra trùng lịch: $e');
+      return true; // Chặn nếu lỗi truy vấn
     }
   }
 }

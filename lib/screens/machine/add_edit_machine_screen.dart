@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/machine_controller.dart';
+import '../../controllers/session_controller.dart';
 import '../../models/agri_machine.dart';
 
 class AddEditMachineScreen extends StatefulWidget {
@@ -74,17 +75,17 @@ class _AddEditMachineScreenState extends State<AddEditMachineScreen> {
 
   void _onSave() async {
     if (_formKey.currentState!.validate()) {
+      final currentUserId = SessionController.instance.currentUser.value?.id ?? 6;
       final newMachine = AgriMachine(
         machineId: widget.machine?.machineId,
-        ownerId: 6,
-        // Tạm thời hard-code OwnerId = 6
+        ownerId: currentUserId,
         machineType: _typeController.text,
         description: _descController.text,
         basePricePerHour: double.tryParse(_priceController.text) ?? 0,
         imageUrl: _imageController.text.isNotEmpty
             ? _imageController.text
             : null,
-        isApproved: 1,
+        isApproved: 0,
       );
 
       final success = await context.read<MachineController>().saveMachine(
