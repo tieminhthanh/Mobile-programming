@@ -52,6 +52,7 @@ class _HomePageState extends State<HomePage> {
         return Scaffold(
           appBar: AppBar(
             title: const Text('Guardian Farm'),
+            automaticallyImplyLeading: false,
             actions: [
               IconButton(
                 tooltip: 'Làm mới dữ liệu',
@@ -64,6 +65,9 @@ class _HomePageState extends State<HomePage> {
                 icon: const Icon(Icons.account_circle_outlined),
               ),
               TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.red.shade700,
+                ),
                 onPressed: () async {
                   await SessionController.instance.logout();
                   if (!context.mounted) return;

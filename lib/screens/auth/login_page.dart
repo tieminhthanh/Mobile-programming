@@ -14,9 +14,31 @@ class _LoginPageState extends State<LoginPage> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  static final RegExp _emailRegex = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
   String? _errorText;
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _didShowRouteMessage = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_didShowRouteMessage) {
+      return;
+    }
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is String && args.trim().isNotEmpty) {
+      _didShowRouteMessage = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) {
+          return;
+        }
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(args)));
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -35,7 +57,7 @@ class _LoginPageState extends State<LoginPage> {
       _errorText = null;
     });
     final result = await SessionController.instance.login(
-      _usernameController.text,
+      _usernameController.text.trim(),
       _passwordController.text,
     );
     if (!mounted) {
@@ -47,6 +69,15 @@ class _LoginPageState extends State<LoginPage> {
         UserRole.admin => AppRoutes.adminDashboard,
         UserRole.farmer => AppRoutes.home,
       };
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(content: Text('Đăng nhập thành công')),
+        );
+      await Future<void>.delayed(const Duration(milliseconds: 350));
+      if (!mounted) {
+        return;
+      }
       Navigator.of(context).pushReplacementNamed(target);
       return;
     }
@@ -96,8 +127,12 @@ class _LoginPageState extends State<LoginPage> {
                         errorText: _errorText,
                       ),
                       validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
+                        final input = value?.trim() ?? '';
+                        if (input.isEmpty) {
                           return 'Vui lòng nhập thông tin đăng nhập';
+                        }
+                        if (input.contains('@') && !_emailRegex.hasMatch(input)) {
+                          return 'Email không hợp lệ';
                         }
                         return null;
                       },
@@ -121,7 +156,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
+                        if (value == null || value.trim().isEmpty) {
                           return 'Vui lòng nhập mật khẩu';
                         }
                         return null;

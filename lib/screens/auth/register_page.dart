@@ -17,6 +17,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  static final RegExp _emailRegex = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
   String? _errorText;
   bool _isLoading = false;
   bool _obscurePassword = true;
@@ -42,16 +43,19 @@ class _RegisterPageState extends State<RegisterPage> {
       _errorText = null;
     });
     final result = await SessionController.instance.register(
-      phoneNumber: _phoneController.text,
-      email: _emailController.text,
-      displayName: _displayNameController.text,
+      phoneNumber: _phoneController.text.trim(),
+      email: _emailController.text.trim(),
+      displayName: _displayNameController.text.trim(),
       password: _passwordController.text,
     );
     if (!mounted) {
       return;
     }
     if (result.status == RegisterStatus.success) {
-      Navigator.of(context).pushReplacementNamed(AppRoutes.login);
+      Navigator.of(context).pushReplacementNamed(
+        AppRoutes.login,
+        arguments: 'Đăng ký thành công, vui lòng đăng nhập',
+      );
       return;
     }
     setState(() {
@@ -99,6 +103,12 @@ class _RegisterPageState extends State<RegisterPage> {
                             prefixIcon: Icon(Icons.badge_outlined),
                             labelText: 'Họ và tên',
                           ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Vui lòng nhập họ và tên';
+                            }
+                            return null;
+                          },
                         ),
                         const SizedBox(height: 10),
                         TextFormField(
@@ -122,8 +132,18 @@ class _RegisterPageState extends State<RegisterPage> {
                           textInputAction: TextInputAction.next,
                           decoration: const InputDecoration(
                             prefixIcon: Icon(Icons.email_outlined),
-                            labelText: 'Email (tùy chọn)',
+                            labelText: 'Email',
                           ),
+                          validator: (value) {
+                            final email = value?.trim() ?? '';
+                            if (email.isEmpty) {
+                              return 'Vui lòng nhập email';
+                            }
+                            if (!_emailRegex.hasMatch(email)) {
+                              return 'Email không hợp lệ';
+                            }
+                            return null;
+                          },
                         ),
                         const SizedBox(height: 10),
                         TextFormField(
@@ -145,7 +165,10 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                           ),
                           validator: (value) {
-                            if (value == null || value.length < 6) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Vui lòng nhập mật khẩu';
+                            }
+                            if (value.length < 6) {
                               return 'Mật khẩu tối thiểu 6 ký tự';
                             }
                             return null;
@@ -170,6 +193,9 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                           ),
                           validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Vui lòng nhập lại mật khẩu';
+                            }
                             if (value != _passwordController.text) {
                               return 'Mật khẩu không khớp';
                             }
