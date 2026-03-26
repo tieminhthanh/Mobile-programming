@@ -201,8 +201,11 @@ class MachineRepository {
   Future<bool> insertMachine(AgriMachine machine) async {
     try {
       final db = await dbService.provider.database;
-      final machineId = await db.insert('logistics_AgriMachines', machine.toMap());
-      
+      final machineId = await db.insert(
+        'logistics_AgriMachines',
+        machine.toMap(),
+      );
+
       // Xử lý lưu ảnh nếu có
       if (machine.imageUrl != null && machine.imageUrl!.isNotEmpty) {
         await db.insert('Images', {
@@ -231,8 +234,12 @@ class MachineRepository {
       );
 
       // Xử lý cập nhật/xóa ảnh
-      await db.delete('Images', where: 'ReferenceId = ? AND ReferenceType = ?', whereArgs: [machine.machineId, 'MACHINE']);
-      
+      await db.delete(
+        'Images',
+        where: 'ReferenceId = ? AND ReferenceType = ?',
+        whereArgs: [machine.machineId, 'MACHINE'],
+      );
+
       if (machine.imageUrl != null && machine.imageUrl!.isNotEmpty) {
         await db.insert('Images', {
           'ReferenceId': machine.machineId,
@@ -264,7 +271,7 @@ class MachineRepository {
     }
   }
 
-    /// Lấy số liệu thống kê cho chủ máy (bao gồm cả doanh thu bán hàng)
+  /// Lấy số liệu thống kê cho chủ máy (bao gồm cả doanh thu bán hàng)
   Future<Map<String, dynamic>> getOwnerStats(int ownerId) async {
     try {
       // 1. Tính tổng doanh thu từ các đơn thuê máy đã hoàn thành
@@ -291,11 +298,15 @@ class MachineRepository {
       );
 
       final machineRevenue = (revenueQuery.first['totalRevenue'] ?? 0.0) as num;
-      final productRevenue = (productRevenueQuery.first['totalProductRevenue'] ?? 0.0) as num;
-      final totalRevenue = machineRevenue.toDouble() + productRevenue.toDouble();
+      final productRevenue =
+          (productRevenueQuery.first['totalProductRevenue'] ?? 0.0) as num;
+      final totalRevenue =
+          machineRevenue.toDouble() + productRevenue.toDouble();
 
-      final machineCompleted = (revenueQuery.first['completedCount'] ?? 0) as int;
-      final productCompleted = (productRevenueQuery.first['completedProductOrders'] ?? 0) as int;
+      final machineCompleted =
+          (revenueQuery.first['completedCount'] ?? 0) as int;
+      final productCompleted =
+          (productRevenueQuery.first['completedProductOrders'] ?? 0) as int;
       final totalCompleted = machineCompleted + productCompleted;
 
       // 3. Đếm tổng số máy đang sở hữu
@@ -316,7 +327,6 @@ class MachineRepository {
       return {'revenue': 0.0, 'completed': 0, 'totalMachines': 0};
     }
   }
-
 
   /// Kiểm tra xem máy có đơn hàng nào đang 'BOOKED' hoặc 'IN_PROGRESS' không
   Future<bool> hasActiveBookings(int machineId) async {
@@ -374,7 +384,11 @@ class MachineRepository {
   }
 
   /// Kiểm tra trùng lịch trước khi cho phép đặt máy
-  Future<bool> checkTimeOverlap(int machineId, String startTime, String endTime) async {
+  Future<bool> checkTimeOverlap(
+    int machineId,
+    String startTime,
+    String endTime,
+  ) async {
     try {
       final String sql = '''
         SELECT COUNT(*) as count 
@@ -383,11 +397,12 @@ class MachineRepository {
           AND Status IN ('BOOKED', 'IN_PROGRESS')
           AND (StartTime < ? AND EndTime > ?)
       ''';
-      
-      final result = await dbService.rawQuery(
-        sql,
-        [machineId, endTime, startTime],
-      );
+
+      final result = await dbService.rawQuery(sql, [
+        machineId,
+        endTime,
+        startTime,
+      ]);
 
       return (result.first['count'] as int) > 0;
     } catch (e) {

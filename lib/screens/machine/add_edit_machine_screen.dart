@@ -75,7 +75,8 @@ class _AddEditMachineScreenState extends State<AddEditMachineScreen> {
 
   void _onSave() async {
     if (_formKey.currentState!.validate()) {
-      final currentUserId = SessionController.instance.currentUser.value?.id ?? 6;
+      final currentUserId =
+          SessionController.instance.currentUser.value?.id ?? 6;
       final newMachine = AgriMachine(
         machineId: widget.machine?.machineId,
         ownerId: currentUserId,

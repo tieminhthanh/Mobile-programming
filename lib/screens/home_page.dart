@@ -61,7 +61,8 @@ class _HomePageState extends State<HomePage> {
               ),
               IconButton(
                 tooltip: 'Tài khoản',
-                onPressed: () => Navigator.of(context).pushNamed(AppRoutes.profile),
+                onPressed: () =>
+                    Navigator.of(context).pushNamed(AppRoutes.profile),
                 icon: const Icon(Icons.account_circle_outlined),
               ),
               TextButton(
@@ -87,8 +88,10 @@ class _HomePageState extends State<HomePage> {
                 roleColor: _roleColor(user?.role),
               ),
               const SizedBox(height: 24),
-              
-              _SectionHeader(title: isSME ? 'Hiệu suất kinh doanh' : 'Tổng quan nhanh'),
+
+              _SectionHeader(
+                title: isSME ? 'Hiệu suất kinh doanh' : 'Tổng quan nhanh',
+              ),
               const SizedBox(height: 12),
               isSME ? _SMEMetricsGrid() : _FarmerMetricsRow(user: user),
 
@@ -104,15 +107,10 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 24),
               _SectionHeader(title: 'Chức năng chính'),
               const SizedBox(height: 12),
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: quickActions,
-              ),
+              Wrap(spacing: 12, runSpacing: 12, children: quickActions),
               const SizedBox(height: 24),
             ],
           ),
-        
         );
       },
     );
@@ -123,13 +121,29 @@ class _HomePageState extends State<HomePage> {
       builder: (context, controller, _) {
         return Column(
           children: [
-            _StatCard(title: 'Doanh thu dự kiến', value: '${controller.totalRevenue.toStringAsFixed(0)} VNĐ', icon: Icons.payments_outlined),
+            _StatCard(
+              title: 'Doanh thu dự kiến',
+              value: '${controller.totalRevenue.toStringAsFixed(0)} VNĐ',
+              icon: Icons.payments_outlined,
+            ),
             const SizedBox(height: 12),
             Row(
               children: [
-                Expanded(child: _StatCard(title: 'Đơn hoàn tất', value: controller.completedOrders.toString(), icon: Icons.check_circle_outline)),
+                Expanded(
+                  child: _StatCard(
+                    title: 'Đơn hoàn tất',
+                    value: controller.completedOrders.toString(),
+                    icon: Icons.check_circle_outline,
+                  ),
+                ),
                 const SizedBox(width: 12),
-                Expanded(child: _StatCard(title: 'Số máy sở hữu', value: controller.totalMachinesCount.toString(), icon: Icons.agriculture_outlined)),
+                Expanded(
+                  child: _StatCard(
+                    title: 'Số máy sở hữu',
+                    value: controller.totalMachinesCount.toString(),
+                    icon: Icons.agriculture_outlined,
+                  ),
+                ),
               ],
             ),
           ],
@@ -144,9 +158,21 @@ class _HomePageState extends State<HomePage> {
       builder: (context, snapshot) {
         return Row(
           children: [
-            Expanded(child: _StatCard(title: 'Địa chỉ đã lưu', value: snapshot.data?.toString() ?? '0', icon: Icons.place_outlined)),
+            Expanded(
+              child: _StatCard(
+                title: 'Địa chỉ đã lưu',
+                value: snapshot.data?.toString() ?? '0',
+                icon: Icons.place_outlined,
+              ),
+            ),
             const SizedBox(width: 12),
-            Expanded(child: _StatCard(title: 'Trạng thái', value: (user?.isActive ?? true) ? 'Hoạt động' : 'Bị khóa', icon: Icons.verified_user_outlined)),
+            Expanded(
+              child: _StatCard(
+                title: 'Trạng thái',
+                value: (user?.isActive ?? true) ? 'Hoạt động' : 'Bị khóa',
+                icon: Icons.verified_user_outlined,
+              ),
+            ),
           ],
         );
       },
@@ -157,23 +183,75 @@ class _HomePageState extends State<HomePage> {
     final role = user?.role;
     if (role == UserRole.admin) {
       return [
-        _QuickAction(label: 'Quản trị hệ thống', icon: Icons.admin_panel_settings_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.adminDashboard)),
-        _QuickAction(label: 'Người dùng', icon: Icons.groups_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.userList)),
-        _QuickAction(label: 'Thống kê', icon: Icons.bar_chart_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.systemStats)),
-        _QuickAction(label: 'Xem sản phẩm', icon: Icons.storefront_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.marketplace)),
-        _QuickAction(label: 'Duyệt máy', icon: Icons.fact_check_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.adminMachineApproval)),
-        _QuickAction(label: 'Cá nhân', icon: Icons.badge_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.profile)),
+        _QuickAction(
+          label: 'Quản trị hệ thống',
+          icon: Icons.admin_panel_settings_outlined,
+          onTap: () =>
+              Navigator.of(context).pushNamed(AppRoutes.adminDashboard),
+        ),
+        _QuickAction(
+          label: 'Người dùng',
+          icon: Icons.groups_outlined,
+          onTap: () => Navigator.of(context).pushNamed(AppRoutes.userList),
+        ),
+        _QuickAction(
+          label: 'Thống kê',
+          icon: Icons.bar_chart_outlined,
+          onTap: () => Navigator.of(context).pushNamed(AppRoutes.systemStats),
+        ),
+        _QuickAction(
+          label: 'Xem sản phẩm',
+          icon: Icons.storefront_outlined,
+          onTap: () => Navigator.of(context).pushNamed(AppRoutes.marketplace),
+        ),
+        _QuickAction(
+          label: 'Duyệt máy',
+          icon: Icons.fact_check_outlined,
+          onTap: () =>
+              Navigator.of(context).pushNamed(AppRoutes.adminMachineApproval),
+        ),
+        _QuickAction(
+          label: 'Cá nhân',
+          icon: Icons.badge_outlined,
+          onTap: () => Navigator.of(context).pushNamed(AppRoutes.profile),
+        ),
       ];
     }
 
     if (role == UserRole.sme) {
       return [
-        _QuickAction(label: 'Kho máy của tôi', icon: Icons.agriculture_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.ownerMachines)),
-        _QuickAction(label: 'Lịch máy', icon: Icons.calendar_month_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.ownerCalendar)),
-        _QuickAction(label: 'Xem sản phẩm', icon: Icons.storefront_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.marketplace)),
-        _QuickAction(label: 'Hồ sơ doanh nghiệp', icon: Icons.apartment_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.enterpriseProfile)),
-        _QuickAction(label: 'Đổi mật khẩu', icon: Icons.lock_reset_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.changePassword)),
-        _QuickAction(label: 'Thông tin cá nhân', icon: Icons.badge_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.profile)),
+        _QuickAction(
+          label: 'Kho máy của tôi',
+          icon: Icons.agriculture_outlined,
+          onTap: () => Navigator.of(context).pushNamed(AppRoutes.ownerMachines),
+        ),
+        _QuickAction(
+          label: 'Lịch máy',
+          icon: Icons.calendar_month_outlined,
+          onTap: () => Navigator.of(context).pushNamed(AppRoutes.ownerCalendar),
+        ),
+        _QuickAction(
+          label: 'Xem sản phẩm',
+          icon: Icons.storefront_outlined,
+          onTap: () => Navigator.of(context).pushNamed(AppRoutes.marketplace),
+        ),
+        _QuickAction(
+          label: 'Hồ sơ doanh nghiệp',
+          icon: Icons.apartment_outlined,
+          onTap: () =>
+              Navigator.of(context).pushNamed(AppRoutes.enterpriseProfile),
+        ),
+        _QuickAction(
+          label: 'Đổi mật khẩu',
+          icon: Icons.lock_reset_outlined,
+          onTap: () =>
+              Navigator.of(context).pushNamed(AppRoutes.changePassword),
+        ),
+        _QuickAction(
+          label: 'Thông tin cá nhân',
+          icon: Icons.badge_outlined,
+          onTap: () => Navigator.of(context).pushNamed(AppRoutes.profile),
+        ),
       ];
     }
 
@@ -185,11 +263,31 @@ class _HomePageState extends State<HomePage> {
           Navigator.of(context).pushNamed(AppRoutes.machineList);
         },
       ),
-      _QuickAction(label: 'Xem sản phẩm', icon: Icons.storefront_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.marketplace)),
-      _QuickAction(label: 'Giỏ hàng', icon: Icons.shopping_cart_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.marketplaceCart)),
-      _QuickAction(label: 'Địa chỉ', icon: Icons.place_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.addressList)),
-      _QuickAction(label: 'Mật khẩu', icon: Icons.lock_reset_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.changePassword)),
-      _QuickAction(label: 'Cá nhân', icon: Icons.badge_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.profile)),
+      _QuickAction(
+        label: 'Xem sản phẩm',
+        icon: Icons.storefront_outlined,
+        onTap: () => Navigator.of(context).pushNamed(AppRoutes.marketplace),
+      ),
+      _QuickAction(
+        label: 'Giỏ hàng',
+        icon: Icons.shopping_cart_outlined,
+        onTap: () => Navigator.of(context).pushNamed(AppRoutes.marketplaceCart),
+      ),
+      _QuickAction(
+        label: 'Địa chỉ',
+        icon: Icons.place_outlined,
+        onTap: () => Navigator.of(context).pushNamed(AppRoutes.addressList),
+      ),
+      _QuickAction(
+        label: 'Mật khẩu',
+        icon: Icons.lock_reset_outlined,
+        onTap: () => Navigator.of(context).pushNamed(AppRoutes.changePassword),
+      ),
+      _QuickAction(
+        label: 'Cá nhân',
+        icon: Icons.badge_outlined,
+        onTap: () => Navigator.of(context).pushNamed(AppRoutes.profile),
+      ),
     ];
   }
 
@@ -236,9 +334,9 @@ class _HomePageState extends State<HomePage> {
       _QuickAction(
         label: 'Thông tin nông dân',
         icon: Icons.person_outline,
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const FarmerDetailScreen()),
-        ),
+        onTap: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const FarmerDetailScreen())),
       ),
     ];
   }
@@ -263,7 +361,12 @@ class _HomePageState extends State<HomePage> {
 }
 
 class _HeroCard extends StatelessWidget {
-  const _HeroCard({required this.displayName, required this.roleTitle, required this.roleHint, required this.roleColor});
+  const _HeroCard({
+    required this.displayName,
+    required this.roleTitle,
+    required this.roleHint,
+    required this.roleColor,
+  });
   final String displayName, roleTitle, roleHint;
   final Color roleColor;
 
@@ -275,14 +378,30 @@ class _HeroCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Xin chào, $displayName', style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              'Xin chào, $displayName',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 6),
-            Text(roleHint, style: TextStyle(color: Colors.grey[700], fontSize: 13)),
+            Text(
+              roleHint,
+              style: TextStyle(color: Colors.grey[700], fontSize: 13),
+            ),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(color: roleColor.withOpacity(0.12), borderRadius: BorderRadius.circular(20)),
-              child: Text(roleTitle, style: TextStyle(color: roleColor, fontWeight: FontWeight.bold, fontSize: 12)),
+              decoration: BoxDecoration(
+                color: roleColor.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                roleTitle,
+                style: TextStyle(
+                  color: roleColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
             ),
           ],
         ),
@@ -292,7 +411,11 @@ class _HeroCard extends StatelessWidget {
 }
 
 class _StatCard extends StatelessWidget {
-  const _StatCard({required this.title, required this.value, required this.icon});
+  const _StatCard({
+    required this.title,
+    required this.value,
+    required this.icon,
+  });
   final String title, value;
   final IconData icon;
 
@@ -306,8 +429,14 @@ class _StatCard extends StatelessWidget {
           children: [
             Icon(icon, color: const Color(0xFF1F7A4A), size: 20),
             const SizedBox(height: 8),
-            Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            Text(title, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              title,
+              style: const TextStyle(fontSize: 11, color: Colors.grey),
+            ),
           ],
         ),
       ),
@@ -316,7 +445,11 @@ class _StatCard extends StatelessWidget {
 }
 
 class _QuickAction extends StatelessWidget {
-  const _QuickAction({required this.label, required this.icon, required this.onTap});
+  const _QuickAction({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+  });
   final String label;
   final IconData icon;
   final VoidCallback onTap;
@@ -362,7 +495,10 @@ class _QuickAction extends StatelessWidget {
               const SizedBox(height: 10),
               Text(
                 label,
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ],
           ),
@@ -376,5 +512,8 @@ class _SectionHeader extends StatelessWidget {
   const _SectionHeader({required this.title});
   final String title;
   @override
-  Widget build(BuildContext context) => Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold));
+  Widget build(BuildContext context) => Text(
+    title,
+    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+  );
 }

@@ -99,7 +99,9 @@ class MachineController extends ChangeNotifier {
     if (user == null) return false;
 
     if (machineId <= 0) {
-      print('MachineController.createBooking: machineId không hợp lệ ($machineId)');
+      print(
+        'MachineController.createBooking: machineId không hợp lệ ($machineId)',
+      );
       return false;
     }
 
@@ -107,9 +109,14 @@ class MachineController extends ChangeNotifier {
     final endStr = end.toIso8601String();
 
     // KIỂM TRA TRÙNG LỊCH THUÊ
-    final isOverlap = await _repository.checkTimeOverlap(machineId, startStr, endStr);
+    final isOverlap = await _repository.checkTimeOverlap(
+      machineId,
+      startStr,
+      endStr,
+    );
     if (isOverlap) {
-      bookingErrorMessage = 'Khung giờ này máy đã có lịch bận. Vui lòng chọn khung giờ khác!';
+      bookingErrorMessage =
+          'Khung giờ này máy đã có lịch bận. Vui lòng chọn khung giờ khác!';
       notifyListeners();
       return false;
     }
@@ -125,7 +132,8 @@ class MachineController extends ChangeNotifier {
     );
 
     if (!success) {
-      bookingErrorMessage = 'Không thể tạo booking (db insert lỗi hoặc constraint).';
+      bookingErrorMessage =
+          'Không thể tạo booking (db insert lỗi hoặc constraint).';
       print('MachineController.createBooking failed: machineId=$machineId');
     } else {
       bookingErrorMessage = null;
@@ -237,15 +245,9 @@ class MachineController extends ChangeNotifier {
       myMachines.removeWhere((m) => m.machineId == machineId);
       await fetchOwnerStats(); // Cập nhật Dashboard
       notifyListeners();
-      return {
-        'success': true,
-        'message': 'Đã xóa kho máy thành công',
-      };
+      return {'success': true, 'message': 'Đã xóa kho máy thành công'};
     }
-    return {
-      'success': false,
-      'message': 'Lỗi hệ thống!',
-    };
+    return {'success': false, 'message': 'Lỗi hệ thống!'};
   }
 
   Future<bool> saveMachine(AgriMachine machine) async {
