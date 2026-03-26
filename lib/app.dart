@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:guardian/core/widgets/auth_guard.dart';
 import 'package:guardian/models/user.dart';
@@ -12,6 +12,7 @@ import 'routes/app_routes.dart';
 import 'screens/address/address_edit_page.dart';
 import 'screens/address/address_list_page.dart';
 import 'screens/admin/admin_dashboard_page.dart';
+import 'screens/admin/admin_machine_approval_screen.dart';
 import 'screens/admin/admin_support_page.dart';
 import 'screens/admin/system_stats_page.dart';
 import 'screens/auth/change_password_page.dart';
@@ -232,6 +233,10 @@ class GuardianApp extends StatelessWidget {
         AppRoutes.adminSupport: (context) => guarded(
           const AdminSupportPage(),
           roles: ownerRoles,
+        ),
+        AppRoutes.adminMachineApproval: (context) => guarded(
+          const AdminMachineApprovalScreen(),
+          roles: const [UserRole.admin],
         ),
         AppRoutes.machineList: (context) => guarded(
           const MachineListScreen(),

@@ -313,4 +313,35 @@ class MachineController extends ChangeNotifier {
   Future<bool> checkMachineBusy(int machineId) async {
     return await _repository.hasActiveBookings(machineId);
   }
+
+  // ==========================================
+  // 9. QUẢN LÝ DUYỆT MÁY (CHO ADMIN)
+  // ==========================================
+  List<AgriMachine> pendingMachines = [];
+  bool isLoadingPending = false;
+
+  Future<void> fetchPendingMachines() async {
+    final user = _currentUser;
+    if (user == null || user.role != UserRole.admin) return;
+
+    isLoadingPending = true;
+    notifyListeners();
+
+    pendingMachines = await _repository.getPendingMachines();
+
+    isLoadingPending = false;
+    notifyListeners();
+  }
+
+  Future<bool> approveMachine(int machineId) async {
+    final user = _currentUser;
+    if (user == null || user.role != UserRole.admin) return false;
+
+    final success = await _repository.approveMachine(machineId);
+    if (success) {
+      pendingMachines.removeWhere((m) => m.machineId == machineId);
+      notifyListeners();
+    }
+    return success;
+  }
 }

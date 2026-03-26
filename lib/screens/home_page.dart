@@ -161,6 +161,7 @@ class _HomePageState extends State<HomePage> {
         _QuickAction(label: 'Người dùng', icon: Icons.groups_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.userList)),
         _QuickAction(label: 'Thống kê', icon: Icons.bar_chart_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.systemStats)),
         _QuickAction(label: 'Xem sản phẩm', icon: Icons.storefront_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.marketplace)),
+        _QuickAction(label: 'Duyệt máy', icon: Icons.fact_check_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.adminMachineApproval)),
         _QuickAction(label: 'Cá nhân', icon: Icons.badge_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.profile)),
       ];
     }
@@ -181,22 +182,7 @@ class _HomePageState extends State<HomePage> {
         label: 'Thuê máy',
         icon: Icons.agriculture_outlined,
         onTap: () {
-          // Tạm thời hoãn chức năng gốc, ghi chú để dễ rollback
-          // Navigator.of(context).pushNamed(AppRoutes.machineList);
-
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('Tính năng đang phát triển'),
-              content: const Text('Tính năng Thuê máy hiện đang trong quá trình phát triển. Vui lòng chờ bản cập nhật tiếp theo.'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Đóng'),
-                ),
-              ],
-            ),
-          );
+          Navigator.of(context).pushNamed(AppRoutes.machineList);
         },
       ),
       _QuickAction(label: 'Xem sản phẩm', icon: Icons.storefront_outlined, onTap: () => Navigator.of(context).pushNamed(AppRoutes.marketplace)),
