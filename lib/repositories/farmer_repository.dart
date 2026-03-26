@@ -73,10 +73,7 @@ class FarmerRepository {
   /// Thêm hoặc cập nhật nông dân
   Future<bool> saveFarmer(Farmer farmer) async {
     try {
-      await dbService.insert(
-        farmerProfilesTable.name,
-        farmer.toMap(),
-      );
+      await dbService.insert(farmerProfilesTable.name, farmer.toMap());
       return true;
     } catch (e) {
       print('Error saving farmer: $e');
@@ -192,10 +189,7 @@ class FarmerRepository {
   /// Thêm hoặc cập nhật trang trại
   Future<bool> saveFarm(Farm farm) async {
     try {
-      await dbService.insert(
-        farmsTable.name,
-        farm.toMap(),
-      );
+      await dbService.insert(farmsTable.name, farm.toMap());
       return true;
     } catch (e) {
       print('Error saving farm: $e');
@@ -204,13 +198,28 @@ class FarmerRepository {
   }
 
   /// Cập nhật thông tin trang trại
-  Future<bool> updateFarm(Farm farm) async {
+  ///
+  /// Nếu [requesterFarmerId] được cung cấp, chỉ cập nhật khi [farmerId] của trang trại trùng khớp.
+  Future<bool> updateFarm(Farm farm, {String? requesterFarmerId}) async {
     try {
+      if (farm.farmId == null) {
+        print('Error updating farm: farmId is null');
+        return false;
+      }
+
+      final whereClause = requesterFarmerId != null
+          ? '${farmsTable.column('farmId')} = ? AND ${farmsTable.column('farmerId')} = ?'
+          : '${farmsTable.column('farmId')} = ?';
+
+      final whereArgs = requesterFarmerId != null
+          ? [farm.farmId, int.tryParse(requesterFarmerId) ?? -1]
+          : [farm.farmId];
+
       final updated = await dbService.update(
         farmsTable.name,
         farm.toMap(),
-        where: '${farmsTable.column('farmId')} = ?',
-        whereArgs: [farm.farmId],
+        where: whereClause,
+        whereArgs: whereArgs,
       );
       return updated > 0;
     } catch (e) {
@@ -220,12 +229,22 @@ class FarmerRepository {
   }
 
   /// Xóa trang trại
-  Future<bool> deleteFarm(int farmId) async {
+  ///
+  /// Nếu [requesterFarmerId] được cung cấp, chỉ xóa khi trang trại thuộc về requester.
+  Future<bool> deleteFarm(int farmId, {String? requesterFarmerId}) async {
     try {
+      final whereClause = requesterFarmerId != null
+          ? '${farmsTable.column('farmId')} = ? AND ${farmsTable.column('farmerId')} = ?'
+          : '${farmsTable.column('farmId')} = ?';
+
+      final whereArgs = requesterFarmerId != null
+          ? [farmId, int.tryParse(requesterFarmerId) ?? -1]
+          : [farmId];
+
       final deleted = await dbService.delete(
         farmsTable.name,
-        where: '${farmsTable.column('farmId')} = ?',
-        whereArgs: [farmId],
+        where: whereClause,
+        whereArgs: whereArgs,
       );
       return deleted > 0;
     } catch (e) {
@@ -295,10 +314,7 @@ class FarmerRepository {
   /// Thêm ảnh mới
   Future<bool> saveImage(FarmerImage image) async {
     try {
-      await dbService.insert(
-        imagesTable.name,
-        image.toMap(),
-      );
+      await dbService.insert(imagesTable.name, image.toMap());
       return true;
     } catch (e) {
       print('Error saving image: $e');
@@ -379,10 +395,7 @@ class FarmerRepository {
   }
 
   /// Cập nhật thứ tự hiển thị ảnh
-  Future<bool> updateImageDisplayOrder(
-    String imageId,
-    int displayOrder,
-  ) async {
+  Future<bool> updateImageDisplayOrder(String imageId, int displayOrder) async {
     try {
       final updated = await dbService.update(
         imagesTable.name,

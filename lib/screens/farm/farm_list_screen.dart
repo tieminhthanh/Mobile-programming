@@ -7,15 +7,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:guardian/controllers/farmer_controller.dart';
+import 'package:guardian/controllers/session_controller.dart';
 import 'package:guardian/models/farm.dart';
+import 'package:guardian/models/user.dart';
 import 'package:guardian/screens/farm/farm_detail_screen.dart';
 import 'package:guardian/core/widgets/custom_button.dart';
 import 'package:guardian/core/widgets/loading_widget.dart';
 
 class FarmListScreen extends StatefulWidget {
-  final String? farmerId; // Nếu có, chỉ hiển thị farm của nông dân này
-
-  const FarmListScreen({super.key, this.farmerId});
+  const FarmListScreen({super.key});
 
   @override
   State<FarmListScreen> createState() => _FarmListScreenState();
@@ -40,8 +40,9 @@ class _FarmListScreenState extends State<FarmListScreen> {
   }
 
   void _loadFarms() {
-    if (widget.farmerId != null) {
-      _controller.loadFarmsByFarmerId(widget.farmerId!);
+    final sessionUser = SessionController.instance.currentUser.value;
+    if (sessionUser != null && sessionUser.role == UserRole.farmer) {
+      _controller.loadFarmsByFarmerId(sessionUser.id.toString());
     } else {
       _controller.loadAllFarms();
     }
@@ -55,15 +56,22 @@ class _FarmListScreenState extends State<FarmListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final sessionUser = SessionController.instance.currentUser.value;
+    final isFarmerRole = sessionUser?.role == UserRole.farmer;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Quản lý Trang trại'),
+        title: Text(
+          isFarmerRole ? 'Trang trại của tôi' : 'Tất cả Trang trại',
+        ),
         centerTitle: true,
         elevation: 0,
       ),
       body: Consumer<FarmerController>(
         builder: (context, controller, child) {
-          final visibleFarms = controller.farms.where((farm) {
+          final allFarms = controller.farms;
+
+          final visibleFarms = allFarms.where((farm) {
             if (_searchQuery.isEmpty) return true;
             final name = farm.farmName.toLowerCase();
             final location = farm.location.toLowerCase();
@@ -165,18 +173,20 @@ class _FarmListScreenState extends State<FarmListScreen> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToDetailScreen(null),
-        tooltip: 'Thêm trang trại',
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: (isFarmerRole || sessionUser?.role == UserRole.admin)
+          ? FloatingActionButton(
+              onPressed: () => _navigateToDetailScreen(null),
+              tooltip: 'Thêm trang trại',
+              child: const Icon(Icons.add),
+            )
+          : null,
     );
   }
 
   void _navigateToDetailScreen(Farm? farm) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => FarmDetailScreen(farm: farm, farmerId: widget.farmerId),
+        builder: (_) => FarmDetailScreen(farm: farm),
       ),
     ).then((_) => _loadFarms());
   }

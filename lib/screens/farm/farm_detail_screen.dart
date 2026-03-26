@@ -37,12 +37,32 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
   String? _selectedFarmerId;
   bool _isLoading = false;
   bool _farmersLoading = true;
+  bool _isOwner = true;
+  bool _isFarmerRole = false;
 
   @override
   void initState() {
     super.initState();
     _initializeControllers();
+    _setupPermissions();
     _loadFarmers();
+  }
+
+  void _setupPermissions() {
+    final sessionUser = SessionController.instance.currentUser.value;
+    _isFarmerRole = sessionUser?.role == UserRole.farmer;
+
+    if (_isFarmerRole) {
+      final currentFarmerId = sessionUser?.id.toString();
+      if (widget.farm != null) {
+        _isOwner = widget.farm!.farmerId == currentFarmerId;
+      } else {
+        _isOwner = true;
+        _selectedFarmerId = currentFarmerId;
+      }
+    } else {
+      _isOwner = true;
+    }
   }
 
   Future<void> _loadFarmers() async {
@@ -75,6 +95,14 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
           _selectedFarmerId = _farmersList.isNotEmpty
               ? _farmersList.first.userId
               : null;
+        }
+
+        // Farmer role only can create/update own farm
+        final sessionUser = SessionController.instance.currentUser.value;
+        if (sessionUser?.role == UserRole.farmer) {
+          _selectedFarmerId = sessionUser?.id.toString();
+          _isOwner =
+              widget.farm == null || widget.farm!.farmerId == _selectedFarmerId;
         }
 
         _farmersLoading = false;
@@ -151,8 +179,14 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
     if (!_validateForm()) return;
 
     final sessionUser = SessionController.instance.currentUser.value;
-    final isFarmerRole = sessionUser?.role == UserRole.farmer;
-    final effectiveFarmerId = _selectedFarmerId;
+    if (_isFarmerRole && !_isOwner) {
+      _showErrorDialog('Bạn chỉ có thể cập nhật trang trại của riêng bạn');
+      return;
+    }
+
+    final effectiveFarmerId = _isFarmerRole
+        ? sessionUser?.id.toString()
+        : _selectedFarmerId;
 
     if (effectiveFarmerId == null || effectiveFarmerId.isEmpty) {
       _showErrorDialog('Vui lòng chọn nông dân');
@@ -388,9 +422,29 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
                               )
                               ? _selectedFarmerId
                               : null,
-                          onChanged: (value) {
-                            setState(() => _selectedFarmerId = value);
-                          },
+                          onChanged: _isFarmerRole
+                              ? null
+                              : (value) {
+                                  setState(() => _selectedFarmerId = value);
+                                },
+                          disabledHint:
+                              _isFarmerRole && _selectedFarmerId != null
+                              ? Text(
+                                  _farmersList
+                                      .firstWhere(
+                                        (f) => f.userId == _selectedFarmerId,
+                                        orElse: () => Farmer(
+                                          userId: '',
+                                          fullName: 'Nông dân không hợp lệ',
+                                          village: '',
+                                          contactName: '',
+                                          contactPhone: '',
+                                          preferredVoice: '',
+                                        ),
+                                      )
+                                      .fullName,
+                                )
+                              : null,
                           items: _farmersList.map((farmer) {
                             return DropdownMenuItem(
                               value: farmer.userId,
@@ -425,6 +479,7 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
               controller: _farmNameController,
               hint: 'Nhập tên trang trại',
               prefixIcon: Icons.landscape,
+              enabled: _isOwner,
             ),
             const SizedBox(height: 16),
 
@@ -438,6 +493,7 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
               controller: _locationController,
               hint: 'Nhập địa điểm/tọa độ',
               prefixIcon: Icons.location_on,
+              enabled: _isOwner,
             ),
             const SizedBox(height: 16),
 
@@ -454,6 +510,7 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
+              enabled: _isOwner,
             ),
             const SizedBox(height: 16),
 
@@ -472,11 +529,16 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
                 value: _cropTypeController.text.isNotEmpty
                     ? _cropTypeController.text
                     : null,
-                onChanged: (value) {
-                  if (value != null) {
-                    _cropTypeController.text = value;
-                  }
-                },
+                onChanged: _isOwner
+                    ? (value) {
+                        if (value != null) {
+                          _cropTypeController.text = value;
+                        }
+                      }
+                    : null,
+                disabledHint: _cropTypeController.text.isNotEmpty
+                    ? Text(_cropTypeController.text)
+                    : const Text('Không thể chỉnh sửa'),
                 items: const [
                   DropdownMenuItem(value: 'Lúa gạo', child: Text('Lúa gạo')),
                   DropdownMenuItem(value: 'Cà phê', child: Text('Cà phê')),
@@ -509,6 +571,7 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
               controller: _certificationsController,
               hint: 'Ví dụ: VietGAP, Organic...',
               prefixIcon: Icons.verified,
+              enabled: _isOwner,
             ),
             const SizedBox(height: 32),
 
@@ -525,9 +588,13 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: CustomButton(
-                    label: widget.farm != null ? 'Cập nhật' : 'Thêm',
+                    label: !_isFarmerRole || _isOwner
+                        ? (widget.farm != null ? 'Cập nhật' : 'Thêm')
+                        : 'Chỉ xem',
                     isLoading: _isLoading,
-                    onPressed: _isLoading ? null : _saveFarm,
+                    onPressed: (!_isFarmerRole || _isOwner) && !_isLoading
+                        ? _saveFarm
+                        : null,
                   ),
                 ),
               ],
@@ -545,8 +612,17 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
               ),
             ],
 
-            // Delete button (chỉ khi chỉnh sửa)
-            if (widget.farm != null) ...[
+            if (_isFarmerRole && !_isOwner)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Text(
+                  'Chỉ xem: bạn chỉ có thể sửa/xóa trang trại của mình.',
+                  style: TextStyle(color: Colors.red.shade700),
+                ),
+              ),
+
+            // Delete button (chỉ khi chỉnh sửa và là chủ sở hữu)
+            if (widget.farm != null && _isOwner) ...[
               const SizedBox(height: 12),
               CustomButton(
                 label: 'Xóa trang trại',
@@ -560,6 +636,7 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
       ),
     );
   }
+
   void _navigateToImageScreen() {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -597,6 +674,11 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
 
     if (widget.farm == null) return;
     if (widget.farm!.farmId == null) return;
+
+    if (_isFarmerRole && !_isOwner) {
+      _showErrorDialog('Bạn chỉ có thể xóa trang trại của mình');
+      return;
+    }
 
     setState(() => _isLoading = true);
 

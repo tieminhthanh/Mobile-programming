@@ -221,7 +221,7 @@ class _HomePageState extends State<HomePage> {
         icon: Icons.landscape_outlined,
         onTap: () => Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (_) => FarmListScreen(farmerId: farmerScopeId),
+            builder: (_) => const FarmListScreen(),
           ),
         ),
       ),

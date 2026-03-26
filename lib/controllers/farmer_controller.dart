@@ -1,13 +1,13 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:guardian/controllers/session_controller.dart';
 import 'package:guardian/models/farm.dart';
 import 'package:guardian/models/farmer.dart';
 import 'package:guardian/models/farmer_image.dart';
+import 'package:guardian/models/user.dart';
 import 'package:guardian/repositories/farmer_repository.dart';
 
 class FarmerController extends ChangeNotifier {
-  FarmerController({
-    required FarmerRepository repository,
-  }) : _repo = repository;
+  FarmerController({required FarmerRepository repository}) : _repo = repository;
 
   final FarmerRepository _repo;
 
@@ -90,9 +90,15 @@ class FarmerController extends ChangeNotifier {
   // =============================
   Future<bool> saveFarm(Farm farm) async {
     try {
-      final success = await _repo.saveFarm(farm);
+      final sessionUser = SessionController.instance.currentUser.value;
+      final effectiveFarm =
+          (sessionUser?.role == UserRole.farmer && sessionUser?.id != null)
+          ? farm.copyWith(farmerId: sessionUser!.id.toString())
+          : farm;
+
+      final success = await _repo.saveFarm(effectiveFarm);
       if (success) {
-        farms.add(farm);
+        farms.add(effectiveFarm);
         notifyListeners();
       }
       return success;
@@ -104,7 +110,19 @@ class FarmerController extends ChangeNotifier {
 
   Future<bool> updateFarm(Farm farm) async {
     try {
-      final success = await _repo.updateFarm(farm);
+      final sessionUser = SessionController.instance.currentUser.value;
+      if (sessionUser?.role == UserRole.farmer &&
+          farm.farmerId != sessionUser?.id.toString()) {
+        errorMessage = 'Bạn chỉ có thể cập nhật trang trại của mình';
+        return false;
+      }
+
+      final success = await _repo.updateFarm(
+        farm,
+        requesterFarmerId: sessionUser?.role == UserRole.farmer
+            ? sessionUser?.id.toString()
+            : null,
+      );
       if (success) {
         final index = farms.indexWhere((f) => f.farmId == farm.farmId);
         if (index >= 0) {
@@ -121,7 +139,33 @@ class FarmerController extends ChangeNotifier {
 
   Future<bool> deleteFarm(int farmId) async {
     try {
-      final success = await _repo.deleteFarm(farmId);
+      final sessionUser = SessionController.instance.currentUser.value;
+      if (sessionUser?.role == UserRole.farmer) {
+        final farm = farms.firstWhere(
+        (f) => f.farmId == farmId,
+        orElse: () => Farm(
+          farmId: null,
+          farmerId: '',
+          farmName: '',
+          location: '',
+          areaHectares: 0.0,
+          cropType: '',
+        ),
+      );
+
+      final currentFarmerId = sessionUser?.id?.toString();
+      if (farm.farmId == null || farm.farmerId != currentFarmerId) {
+        errorMessage = 'Bạn chỉ có thể xóa trang trại của mình';
+        return false;
+      }
+    }
+
+      final success = await _repo.deleteFarm(
+        farmId,
+        requesterFarmerId: sessionUser?.role == UserRole.farmer
+            ? sessionUser?.id.toString()
+            : null,
+      );
       if (success) {
         farms.removeWhere((farm) => farm.farmId == farmId);
         notifyListeners();
