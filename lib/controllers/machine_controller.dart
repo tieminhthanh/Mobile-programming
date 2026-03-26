@@ -235,11 +235,16 @@ class MachineController extends ChangeNotifier {
     final success = await _repository.deleteMachine(machineId);
     if (success) {
       myMachines.removeWhere((m) => m.machineId == machineId);
+      await fetchOwnerStats(); // Cập nhật Dashboard
       notifyListeners();
+      return {
+        'success': true,
+        'message': 'Đã xóa kho máy thành công',
+      };
     }
     return {
-      'success': success,
-      'message': success ? 'Đã xóa máy!' : 'Lỗi hệ thống!',
+      'success': false,
+      'message': 'Lỗi hệ thống!',
     };
   }
 
@@ -264,6 +269,7 @@ class MachineController extends ChangeNotifier {
 
     if (success) {
       await fetchMyMachines();
+      await fetchOwnerStats(); // Cập nhật thống kê ngay cho Dashboard
     }
     return success;
   }
