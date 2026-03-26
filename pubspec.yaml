@@ -14,7 +14,7 @@ dependencies:
   cupertino_icons: ^1.0.8
 
   # HTTP client để gọi API
-  http: ^1.2.0
+  http: ^1.6.0
 
   # Format tiền tệ, số, ngày tháng
   intl: ^0.20.2
@@ -43,6 +43,7 @@ dependencies:
 
   # Typography
   google_fonts: ^6.2.1
+  image_picker: ^1.2.1
 
 dev_dependencies:
   flutter_test:

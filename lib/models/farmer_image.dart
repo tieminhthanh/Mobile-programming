@@ -25,16 +25,24 @@ class FarmerImage {
 
   /// Convert Map từ database thành FarmerImage object
   factory FarmerImage.fromMap(Map<String, dynamic> map) {
+    final imageIdVal = map['ImageId'];
+    final referenceIdVal = map['ReferenceId'];
+    final referenceTypeVal = map['ReferenceType'];
+    final imageUrlVal = map['ImageUrl'];
+    final isPrimaryVal = map['IsPrimary'];
+    final displayOrderVal = map['DisplayOrder'];
+    final uploadedAtVal = map['UploadedAt'];
+
     return FarmerImage(
-      imageId: map['ImageId'] ?? '',
-      referenceId: map['ReferenceId'] ?? '',
-      referenceType: map['ReferenceType'] ?? '',
-      imageUrl: map['ImageUrl'] ?? '',
-      isPrimary: (map['IsPrimary'] as int?)== 1 ? true : false,
-      displayOrder: (map['DisplayOrder'] as int?) ?? 0,
-      uploadedAt: map['UploadedAt'] != null 
-        ? DateTime.tryParse(map['UploadedAt']) 
-        : null,
+      imageId: imageIdVal?.toString() ?? '',
+      referenceId: referenceIdVal?.toString() ?? '',
+      referenceType: referenceTypeVal?.toString() ?? '',
+      imageUrl: imageUrlVal?.toString() ?? '',
+      isPrimary: (isPrimaryVal is int ? isPrimaryVal == 1 : isPrimaryVal == true),
+      displayOrder: displayOrderVal is int ? displayOrderVal : int.tryParse(displayOrderVal?.toString() ?? '') ?? 0,
+      uploadedAt: uploadedAtVal != null
+          ? DateTime.tryParse(uploadedAtVal.toString())
+          : null,
     );
   }
 

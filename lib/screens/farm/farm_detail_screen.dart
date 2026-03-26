@@ -72,7 +72,9 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
         // fall back to first option or null.
         if (_selectedFarmerId != null &&
             !_farmersList.any((f) => f.userId == _selectedFarmerId)) {
-          _selectedFarmerId = _farmersList.isNotEmpty ? _farmersList.first.userId : null;
+          _selectedFarmerId = _farmersList.isNotEmpty
+              ? _farmersList.first.userId
+              : null;
         }
 
         _farmersLoading = false;
@@ -96,43 +98,43 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
   }
 
   void _initializeControllers() {
-  const List<String> cropTypes = [
-    'Lúa gạo',
-    'Cà phê',
-    'Cao su',
-    'Dâu tây',
-    'Rau xanh',
-    'Trái cây',
-    'Khác',
-  ];
+    const List<String> cropTypes = [
+      'Lúa gạo',
+      'Cà phê',
+      'Cao su',
+      'Dâu tây',
+      'Rau xanh',
+      'Trái cây',
+      'Khác',
+    ];
 
-  final rawCrop = widget.farm?.cropType ?? '';
+    final rawCrop = widget.farm?.cropType ?? '';
 
-  _farmIdController = TextEditingController(
-    text: widget.farm?.farmId?.toString() ?? '',
-  );
+    _farmIdController = TextEditingController(
+      text: widget.farm?.farmId?.toString() ?? '',
+    );
 
-  _farmNameController = TextEditingController(
-    text: widget.farm?.farmName ?? '',
-  );
+    _farmNameController = TextEditingController(
+      text: widget.farm?.farmName ?? '',
+    );
 
-  _locationController = TextEditingController(
-    text: widget.farm?.location ?? '',
-  );
+    _locationController = TextEditingController(
+      text: widget.farm?.location ?? '',
+    );
 
-  _areaHectaresController = TextEditingController(
-    text: widget.farm?.areaHectares.toString() ?? '',
-  );
+    _areaHectaresController = TextEditingController(
+      text: widget.farm?.areaHectares.toString() ?? '',
+    );
 
-  // 🔥 FIX QUAN TRỌNG Ở ĐÂY
-  _cropTypeController = TextEditingController(
-    text: cropTypes.contains(rawCrop) ? rawCrop : 'Khác',
-  );
+    // 🔥 FIX QUAN TRỌNG Ở ĐÂY
+    _cropTypeController = TextEditingController(
+      text: cropTypes.contains(rawCrop) ? rawCrop : 'Khác',
+    );
 
-  _certificationsController = TextEditingController(
-    text: widget.farm?.certifications ?? '',
-  );
-}
+    _certificationsController = TextEditingController(
+      text: widget.farm?.certifications ?? '',
+    );
+  }
 
   @override
   void dispose() {
@@ -150,8 +152,7 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
 
     final sessionUser = SessionController.instance.currentUser.value;
     final isFarmerRole = sessionUser?.role == UserRole.farmer;
-    final effectiveFarmerId =
-        isFarmerRole ? sessionUser?.id.toString() : _selectedFarmerId;
+    final effectiveFarmerId = _selectedFarmerId;
 
     if (effectiveFarmerId == null || effectiveFarmerId.isEmpty) {
       _showErrorDialog('Vui lòng chọn nông dân');
@@ -161,7 +162,9 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
     setState(() => _isLoading = true);
 
     final farm = Farm(
-      farmId: _farmIdController.text.isNotEmpty ? int.tryParse(_farmIdController.text) : null,
+      farmId: _farmIdController.text.isNotEmpty
+          ? int.tryParse(_farmIdController.text)
+          : null,
       farmerId: effectiveFarmerId,
       farmName: _farmNameController.text,
       location: _locationController.text,
@@ -193,7 +196,9 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(widget.farm != null ? 'Cập nhật thành công' : 'Thêm thành công'),
+              content: Text(
+                widget.farm != null ? 'Cập nhật thành công' : 'Thêm thành công',
+              ),
               backgroundColor: Colors.green,
             ),
           );
@@ -201,7 +206,8 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
         }
       } else {
         if (mounted) {
-          final errorMsg = controller.errorMessage ?? 'Lỗi không xác định khi lưu dữ liệu';
+          final errorMsg =
+              controller.errorMessage ?? 'Lỗi không xác định khi lưu dữ liệu';
           print('Save failed: $errorMsg');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -230,8 +236,9 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
   bool _validateForm() {
     final sessionUser = SessionController.instance.currentUser.value;
     final isFarmerRole = sessionUser?.role == UserRole.farmer;
-    final effectiveFarmerId =
-        isFarmerRole ? sessionUser?.id.toString() : _selectedFarmerId;
+    final effectiveFarmerId = isFarmerRole
+        ? sessionUser?.id.toString()
+        : _selectedFarmerId;
 
     if (effectiveFarmerId == null || effectiveFarmerId.isEmpty) {
       _showErrorDialog('Vui lòng chọn nông dân');
@@ -287,7 +294,9 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.farm != null ? 'Chỉnh sửa trang trại' : 'Thêm trang trại mới'),
+        title: Text(
+          widget.farm != null ? 'Chỉnh sửa trang trại' : 'Thêm trang trại mới',
+        ),
         centerTitle: true,
         elevation: 0,
       ),
@@ -322,64 +331,9 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
             ),
             const SizedBox(height: 24),
 
-            // Farm ID (chỉ hiển thị khi chỉnh sửa)
-            if (widget.farm != null) ...[
-              const Text(
-                'ID Trang trại',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              CustomTextField(
-                controller: _farmIdController,
-                hint: 'ID tự động',
-                readOnly: true,
-              ),
-              const SizedBox(height: 16),
-            ],
-
             ValueListenableBuilder<AppUser?>(
               valueListenable: SessionController.instance.currentUser,
               builder: (context, sessionUser, _) {
-                final isFarmerRole = sessionUser?.role == UserRole.farmer;
-
-                if (isFarmerRole) {
-                  final farmerId = sessionUser?.id.toString() ?? '';
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Chọn Nông dân *',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade300),
-                          borderRadius: BorderRadius.circular(8),
-                          color: Colors.grey.shade50,
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.person, color: Colors.grey.shade700),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                'Tự động lấy từ tài khoản đăng nhập (ID: $farmerId)',
-                                style: TextStyle(
-                                  color: Colors.grey.shade700,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  );
-                }
-
-                // Admin (hoặc SME) chọn nông dân qua dropdown
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -388,6 +342,7 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
+
                     if (_farmersLoading)
                       Container(
                         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -395,8 +350,7 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
                           child: SizedBox(
                             height: 20,
                             width: 20,
-                            child:
-                                CircularProgressIndicator(strokeWidth: 2),
+                            child: CircularProgressIndicator(strokeWidth: 2),
                           ),
                         ),
                       )
@@ -414,7 +368,7 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                'Không có nông dân nào. Vui lòng tạo nông dân trước tiên.',
+                                'Không có nông dân nào. Vui lòng tạo nông dân trước.',
                                 style: TextStyle(color: Colors.red.shade600),
                               ),
                             ),
@@ -424,34 +378,33 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
                     else
                       Container(
                         decoration: BoxDecoration(
-                          border:
-                              Border.all(color: Colors.grey.shade300),
+                          border: Border.all(color: Colors.grey.shade300),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: DropdownButtonFormField<String>(
-                          value: _selectedFarmerId,
-                          onChanged: widget.farm != null
-                              ? null
-                              : (value) {
-                                  setState(() => _selectedFarmerId = value);
-                                },
-                          items: _farmersList
-                              .map(
-                                (farmer) => DropdownMenuItem(
-                                  value: farmer.userId,
-                                  child: Text(
-                                    '${farmer.fullName} (ID: ${farmer.userId})',
-                                  ),
-                                ),
+                          value:
+                              _farmersList.any(
+                                (f) => f.userId == _selectedFarmerId,
                               )
-                              .toList(),
-                          decoration: InputDecoration(
+                              ? _selectedFarmerId
+                              : null,
+                          onChanged: (value) {
+                            setState(() => _selectedFarmerId = value);
+                          },
+                          items: _farmersList.map((farmer) {
+                            return DropdownMenuItem(
+                              value: farmer.userId,
+                              child: Text(farmer.fullName), // ✅ chỉ tên
+                            );
+                          }).toList(),
+                          decoration: const InputDecoration(
                             hintText: 'Chọn nông dân',
                             border: InputBorder.none,
-                            contentPadding:
-                                const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 12),
-                            prefixIcon: const Icon(Icons.person),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 12,
+                            ),
+                            prefixIcon: Icon(Icons.person),
                           ),
                           isExpanded: true,
                         ),
@@ -498,7 +451,9 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
               controller: _areaHectaresController,
               hint: 'Nhập diện tích',
               prefixIcon: Icons.straighten,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
             ),
             const SizedBox(height: 16),
 
@@ -514,7 +469,9 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: DropdownButtonFormField<String>(
-                value: _cropTypeController.text.isNotEmpty ? _cropTypeController.text : null,
+                value: _cropTypeController.text.isNotEmpty
+                    ? _cropTypeController.text
+                    : null,
                 onChanged: (value) {
                   if (value != null) {
                     _cropTypeController.text = value;
@@ -532,7 +489,10 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
                 decoration: InputDecoration(
                   hintText: 'Chọn loại cây trồng',
                   border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 12,
+                  ),
                   prefixIcon: const Icon(Icons.eco),
                 ),
               ),
@@ -600,13 +560,12 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
       ),
     );
   }
-
   void _navigateToImageScreen() {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => FarmImageScreen(
           referenceId: widget.farm!.farmId?.toString() ?? '',
-          referenceType: 'Farm',
+          referenceType: 'FARM',
           title: widget.farm!.farmName,
         ),
       ),
@@ -634,35 +593,35 @@ class _FarmDetailScreenState extends State<FarmDetailScreen> {
   }
 
   Future<void> _deleteFarm() async {
-  Navigator.pop(context); // Close dialog
+    Navigator.pop(context); // Close dialog
 
-  if (widget.farm == null) return;
-  if (widget.farm!.farmId == null) return;
+    if (widget.farm == null) return;
+    if (widget.farm!.farmId == null) return;
 
-  setState(() => _isLoading = true);
+    setState(() => _isLoading = true);
 
-  final controller = context.read<FarmerController>();
-  final success = await controller.deleteFarm(widget.farm!.farmId!);
+    final controller = context.read<FarmerController>();
+    final success = await controller.deleteFarm(widget.farm!.farmId!);
 
-  setState(() => _isLoading = false);
+    setState(() => _isLoading = false);
 
-  if (!mounted) return;
+    if (!mounted) return;
 
-  if (success) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Xóa thành công'),
-        backgroundColor: Colors.green,
-      ),
-    );
-    Navigator.pop(context, true);
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(controller.errorMessage ?? 'Lỗi khi xóa'),
-        backgroundColor: Colors.red,
-      ),
-    );
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Xóa thành công'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.pop(context, true);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(controller.errorMessage ?? 'Lỗi khi xóa'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
-}
 }

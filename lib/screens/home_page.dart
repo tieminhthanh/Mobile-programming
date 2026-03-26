@@ -241,7 +241,7 @@ class _HomePageState extends State<HomePage> {
           MaterialPageRoute(
             builder: (_) => const FarmImageScreen(
               referenceId: '0',
-              referenceType: 'Farm',
+              referenceType: 'FARM',
               title: 'Trang trại',
             ),
           ),
